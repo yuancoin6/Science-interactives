@@ -1,0 +1,1810 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>G5-S2 Earth Revolution Star Simulator | 地球公转星空模拟</title>
+  <style>
+    :root {
+      --ink: #e9eef5;
+      --ink-soft: #aebbd0;
+      --panel: #101b2f;
+      --panel-2: #17253e;
+      --sky-top: #04132b;
+      --sky-mid: #0c2a4d;
+      --sky-haze: #28496f;
+      --accent: #f4b86a;
+      --accent-2: #67d2e3;
+      --ok: #8fd18f;
+      --warn: #ffd07a;
+      --line: #345173;
+      --font: "Avenir Next", "Trebuchet MS", "PingFang SC", "Noto Sans SC", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(1200px 600px at 80% -10%, #1f3c66 0%, rgba(31, 60, 102, 0) 65%),
+        radial-gradient(900px 500px at 15% -20%, #15345f 0%, rgba(21, 52, 95, 0) 60%),
+        linear-gradient(180deg, #0a1322, #0c1629 60%, #0a1424 100%);
+      color: var(--ink);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 18px;
+    }
+
+    .app {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .title-bar {
+      background: linear-gradient(135deg, rgba(14, 24, 44, 0.95), rgba(18, 30, 53, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    .title-bar h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      letter-spacing: 0.2px;
+      color: #f8fbff;
+    }
+
+    .title-bar p {
+      margin: 6px 0 0;
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      background: linear-gradient(180deg, rgba(17, 28, 49, 0.96), rgba(15, 24, 43, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      background: rgba(16, 30, 54, 0.55);
+      border: 1px solid #2e4767;
+      border-radius: 10px;
+      padding: 8px;
+    }
+
+    .field.map-field {
+      grid-column: span 3;
+      padding-bottom: 6px;
+    }
+
+    .map-wrap {
+      border: 1px solid #3b5c82;
+      border-radius: 8px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #0d1d34, #0c1a2f);
+    }
+
+    #mapCanvas {
+      width: 100%;
+      height: 188px;
+      display: block;
+      cursor: crosshair;
+    }
+
+    .location-label {
+      margin-top: 7px;
+      color: #cae5fb;
+      font-size: 0.84rem;
+      line-height: 1.35;
+      min-height: 1.1em;
+    }
+
+    .map-hint {
+      margin-top: 3px;
+      color: #9ec3e5;
+      font-size: 0.78rem;
+      min-height: 1.1em;
+    }
+
+    .field.latlng-field {
+      display: grid;
+      gap: 6px;
+      align-content: start;
+    }
+
+    .latlng-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .latlng-grid label {
+      margin: 0 0 4px;
+      font-size: 0.74rem;
+      color: var(--ink-soft);
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.76rem;
+      color: var(--ink-soft);
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+
+    .field input,
+    .field select,
+    .field button {
+      width: 100%;
+      font-family: var(--font);
+      border-radius: 8px;
+      border: 1px solid #3e5c80;
+      background: #0d1d34;
+      color: var(--ink);
+      padding: 8px;
+      font-size: 0.9rem;
+    }
+
+    .field input[type="range"] {
+      padding: 0;
+      accent-color: var(--accent);
+      height: 28px;
+      border: none;
+      background: transparent;
+    }
+
+    .field button {
+      cursor: pointer;
+      background: linear-gradient(120deg, #244d7a, #2a6986);
+      border-color: #4d88b8;
+      font-weight: 700;
+    }
+
+    .field button[data-playing="true"] {
+      background: linear-gradient(120deg, #7a4224, #99602d);
+      border-color: #d59a53;
+    }
+
+    .readout {
+      font-size: 0.84rem;
+      color: var(--accent-2);
+      margin-top: 4px;
+      min-height: 1.2em;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      gap: 10px;
+    }
+
+    .status-card {
+      border: 1px solid #2d4b6d;
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(13, 24, 42, 0.62);
+      font-size: 0.87rem;
+      color: #cfe0f2;
+      line-height: 1.45;
+      min-height: 72px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 12px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, #0d1930, #0d1a31);
+      border: 1px solid #2d4b6d;
+      border-radius: 14px;
+      overflow: hidden;
+      min-height: 460px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 10px 25px rgba(0, 0, 0, 0.2);
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .panel-header {
+      padding: 10px 12px;
+      border-bottom: 1px solid #274264;
+      background: linear-gradient(90deg, rgba(20, 38, 62, 0.85), rgba(17, 31, 52, 0.65));
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .panel-header strong {
+      color: #f2f8ff;
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+
+    .panel-header span {
+      color: #9fb6d2;
+      font-size: 0.8rem;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: transparent;
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 12px;
+    }
+
+    .explain,
+    .quiz {
+      background: linear-gradient(180deg, rgba(17, 30, 52, 0.95), rgba(13, 24, 43, 0.95));
+      border: 1px solid #2d4b6d;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .explain h2,
+    .quiz h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      color: #f5f9ff;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .pill {
+      border: 1px solid #42658a;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #112641;
+      font-size: 0.82rem;
+      color: #d7e7f8;
+    }
+
+    .explain p {
+      margin: 7px 0;
+      line-height: 1.55;
+      color: #d2e0f0;
+    }
+
+    .quiz form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .question {
+      border: 1px solid #355a81;
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(16, 31, 54, 0.65);
+    }
+
+    .question p {
+      margin: 0 0 7px;
+      font-size: 0.9rem;
+      color: #e7f0fb;
+    }
+
+    .question label {
+      display: block;
+      margin: 5px 0;
+      font-size: 0.85rem;
+      color: #d0e0f2;
+      cursor: pointer;
+    }
+
+    .quiz button {
+      border-radius: 8px;
+      border: 1px solid #6a8cb1;
+      background: linear-gradient(120deg, #2d5c89, #33709f);
+      color: #f4f9ff;
+      padding: 9px 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+
+    .quiz-result {
+      min-height: 34px;
+      font-size: 0.88rem;
+      color: #d7e8f8;
+      line-height: 1.45;
+    }
+
+    .quiz-result.ok {
+      color: var(--ok);
+    }
+
+    .quiz-result.warn {
+      color: var(--warn);
+    }
+
+    @media (max-width: 1100px) {
+      .control-grid {
+        grid-template-columns: repeat(3, minmax(130px, 1fr));
+      }
+
+      .field.map-field {
+        grid-column: span 3;
+      }
+
+      .layout,
+      .bottom,
+      .status-row {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        min-height: 390px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 10px;
+      }
+
+      .control-grid {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+
+      .field.map-field {
+        grid-column: span 2;
+      }
+
+      .latlng-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="title-bar">
+      <h1>G5-S2 Earth Revolution Star Simulator | 地球公转与月际星空变化模拟</h1>
+      <p>在同一地点、同一时刻比较不同月份夜空变化，观察为什么主要是 <strong>revolution 公转</strong> 导致可见星空不同。</p>
+    </section>
+
+    <section class="controls">
+      <div class="control-grid">
+        <div class="field">
+          <label for="dateInput">Observation Date | 观测日期</label>
+          <input id="dateInput" type="date">
+        </div>
+        <div class="field">
+          <label for="monthSlider">Month Focus (1-12) | 月份焦点</label>
+          <input id="monthSlider" type="range" min="1" max="12" step="1" value="1">
+          <div class="readout" id="monthReadout"></div>
+        </div>
+        <div class="field">
+          <label for="hourSlider">Local Hour (0-23) | 本地小时</label>
+          <input id="hourSlider" type="range" min="0" max="23.5" step="0.5" value="21">
+          <div class="readout" id="hourReadout"></div>
+        </div>
+        <div class="field">
+          <label for="modeSelect">Mechanism Mode | 机制模式</label>
+          <select id="modeSelect">
+            <option value="combined">Combined (Rotation + Revolution)</option>
+            <option value="rotation_only">Rotation Only (固定公转位置)</option>
+            <option value="revolution_only">Revolution Only (固定本地时刻)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="speedSelect">Playback Speed (days/s) | 播放速度</label>
+          <select id="speedSelect">
+            <option value="0.5">0.5</option>
+            <option value="2" selected>2</option>
+            <option value="8">8</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="playBtn">Timeline | 时间轴</label>
+          <button id="playBtn" data-playing="false">Play | 播放</button>
+        </div>
+      </div>
+
+      <div class="control-grid">
+        <div class="field map-field">
+          <label for="mapCanvas">China Map Picker | 中国选点地图（点击省份/城市）</label>
+          <div class="map-wrap">
+            <canvas id="mapCanvas" aria-label="China location picker"></canvas>
+          </div>
+          <div class="location-label" id="locationLabel">--</div>
+          <div class="map-hint" id="mapHint"></div>
+        </div>
+        <div class="field latlng-field">
+          <label>Latitude / Longitude | 经纬度微调</label>
+          <div class="latlng-grid">
+            <div>
+              <label for="latInput">Lat 纬度</label>
+              <input id="latInput" type="number" step="0.01" min="-89" max="89" value="22.58">
+            </div>
+            <div>
+              <label for="lngInput">Lng 经度</label>
+              <input id="lngInput" type="number" step="0.01" min="-180" max="180" value="113.87">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="showLabels">Star Labels | 亮星名称</label>
+          <select id="showLabels">
+            <option value="on">On</option>
+            <option value="off">Off</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="showConstellations">Constellation Lines | 星座连线</label>
+          <select id="showConstellations">
+            <option value="on">On</option>
+            <option value="off">Off</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="status-row">
+        <div class="status-card" id="modeHint"></div>
+        <div class="status-card" id="insight"></div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <article class="panel">
+        <div class="panel-header">
+          <strong>Sky Dome View | 天穹星空视图</strong>
+          <span id="skyMeta">--</span>
+        </div>
+        <canvas id="skyCanvas" aria-label="Sky dome"></canvas>
+      </article>
+      <article class="panel">
+        <div class="panel-header">
+          <strong>Orbit Compare | 公转对照视图</strong>
+          <span id="orbitMeta">--</span>
+        </div>
+        <canvas id="orbitCanvas" aria-label="Orbit compare"></canvas>
+      </article>
+    </section>
+
+    <section class="bottom">
+      <article class="explain">
+        <h2>Teaching Explanation | 课堂解释</h2>
+        <p id="explainLine1"></p>
+        <p id="explainLine2"></p>
+        <div class="pill-row">
+          <span class="pill">rotation | 自转</span>
+          <span class="pill">revolution | 公转</span>
+          <span class="pill">orbit | 轨道</span>
+          <span class="pill">constellation | 星座</span>
+          <span class="pill">local sidereal time | 恒星时</span>
+        </div>
+      </article>
+      <article class="quiz">
+        <h2>Quick Check | 当堂小测</h2>
+        <form id="quizForm">
+          <div class="question">
+            <p>Q1. 同一地点、同一时刻，1月和2月看到不同星空，主因是？</p>
+            <label><input type="radio" name="q1" value="rotation"> 地球自转 Rotation</label>
+            <label><input type="radio" name="q1" value="revolution"> 地球公转 Revolution</label>
+            <label><input type="radio" name="q1" value="cloud"> 云层变化 Cloud only</label>
+          </div>
+          <div class="question">
+            <p>Q2. 在 Rotation Only 模式下，跨月份星空变化趋势应当如何？</p>
+            <label><input type="radio" name="q2" value="big_change"> 明显持续改变</label>
+            <label><input type="radio" name="q2" value="little_change"> 基本不体现月际迁移</label>
+            <label><input type="radio" name="q2" value="random"> 完全随机</label>
+          </div>
+          <button type="submit">Check Answers | 提交答案</button>
+        </form>
+        <div class="quiz-result" id="quizResult"></div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    "use strict";
+
+    /**
+     * AppState:
+     * {
+     *   date: Date,
+     *   hour: number,
+     *   lat: number,
+     *   lng: number,
+     *   mode: "combined" | "rotation_only" | "revolution_only",
+     *   playbackSpeed: number,
+     *   uiLang: "bilingual",
+     *   showLabels: boolean,
+     *   showConstellations: boolean,
+     *   playing: boolean,
+     *   selectedProvince: string,
+     *   selectedCityLabel: string,
+     *   selectionSource: "map_city" | "map_custom" | "manual_input",
+     *   mapHint: string
+     * }
+     */
+
+    /**
+     * StarRecord:
+     * {
+     *   id: string,
+     *   nameCn: string,
+     *   nameEn: string,
+     *   ra: number,      // hour
+     *   dec: number,     // degree
+     *   mag: number,
+     *   constellation: string
+     * }
+     */
+
+    const STAR_DATA = [
+      { id: "sirius", nameCn: "天狼星", nameEn: "Sirius", ra: 6.752, dec: -16.716, mag: -1.46, constellation: "CMa" },
+      { id: "canopus", nameCn: "老人星", nameEn: "Canopus", ra: 6.399, dec: -52.695, mag: -0.74, constellation: "Car" },
+      { id: "arcturus", nameCn: "大角星", nameEn: "Arcturus", ra: 14.261, dec: 19.182, mag: -0.05, constellation: "Boo" },
+      { id: "vega", nameCn: "织女星", nameEn: "Vega", ra: 18.615, dec: 38.783, mag: 0.03, constellation: "Lyr" },
+      { id: "capella", nameCn: "五车二", nameEn: "Capella", ra: 5.278, dec: 45.998, mag: 0.08, constellation: "Aur" },
+      { id: "rigel", nameCn: "参宿七", nameEn: "Rigel", ra: 5.243, dec: -8.202, mag: 0.12, constellation: "Ori" },
+      { id: "procyon", nameCn: "南河三", nameEn: "Procyon", ra: 7.656, dec: 5.225, mag: 0.38, constellation: "CMi" },
+      { id: "betelgeuse", nameCn: "参宿四", nameEn: "Betelgeuse", ra: 5.919, dec: 7.407, mag: 0.42, constellation: "Ori" },
+      { id: "achernar", nameCn: "水委一", nameEn: "Achernar", ra: 1.628, dec: -57.236, mag: 0.45, constellation: "Eri" },
+      { id: "hadar", nameCn: "马腹一", nameEn: "Hadar", ra: 14.063, dec: -60.374, mag: 0.61, constellation: "Cen" },
+      { id: "altair", nameCn: "牛郎星", nameEn: "Altair", ra: 19.846, dec: 8.868, mag: 0.76, constellation: "Aql" },
+      { id: "acrux", nameCn: "十字架二", nameEn: "Acrux", ra: 12.443, dec: -63.099, mag: 0.77, constellation: "Cru" },
+      { id: "aldebaran", nameCn: "毕宿五", nameEn: "Aldebaran", ra: 4.598, dec: 16.509, mag: 0.85, constellation: "Tau" },
+      { id: "antares", nameCn: "心宿二", nameEn: "Antares", ra: 16.49, dec: -26.432, mag: 1.06, constellation: "Sco" },
+      { id: "spica", nameCn: "角宿一", nameEn: "Spica", ra: 13.42, dec: -11.161, mag: 0.98, constellation: "Vir" },
+      { id: "pollux", nameCn: "北河三", nameEn: "Pollux", ra: 7.755, dec: 28.026, mag: 1.14, constellation: "Gem" },
+      { id: "fomalhaut", nameCn: "北落师门", nameEn: "Fomalhaut", ra: 22.961, dec: -29.622, mag: 1.16, constellation: "PsA" },
+      { id: "deneb", nameCn: "天津四", nameEn: "Deneb", ra: 20.691, dec: 45.281, mag: 1.25, constellation: "Cyg" },
+      { id: "regulus", nameCn: "轩辕十四", nameEn: "Regulus", ra: 10.139, dec: 11.967, mag: 1.35, constellation: "Leo" },
+      { id: "castor", nameCn: "北河二", nameEn: "Castor", ra: 7.576, dec: 31.888, mag: 1.58, constellation: "Gem" },
+      { id: "bellatrix", nameCn: "参宿五", nameEn: "Bellatrix", ra: 5.419, dec: 6.35, mag: 1.64, constellation: "Ori" },
+      { id: "alnilam", nameCn: "参宿二", nameEn: "Alnilam", ra: 5.603, dec: -1.201, mag: 1.69, constellation: "Ori" },
+      { id: "alnitak", nameCn: "参宿一", nameEn: "Alnitak", ra: 5.679, dec: -1.943, mag: 1.77, constellation: "Ori" },
+      { id: "saiph", nameCn: "参宿六", nameEn: "Saiph", ra: 5.795, dec: -9.669, mag: 2.06, constellation: "Ori" },
+      { id: "dubhe", nameCn: "天枢", nameEn: "Dubhe", ra: 11.063, dec: 61.75, mag: 1.79, constellation: "UMa" },
+      { id: "merak", nameCn: "天璇", nameEn: "Merak", ra: 11.031, dec: 56.383, mag: 2.37, constellation: "UMa" },
+      { id: "phecda", nameCn: "天玑", nameEn: "Phecda", ra: 11.897, dec: 53.694, mag: 2.43, constellation: "UMa" },
+      { id: "megrez", nameCn: "天权", nameEn: "Megrez", ra: 12.257, dec: 57.033, mag: 3.32, constellation: "UMa" },
+      { id: "alioth", nameCn: "玉衡", nameEn: "Alioth", ra: 12.901, dec: 55.959, mag: 1.77, constellation: "UMa" },
+      { id: "mizar", nameCn: "开阳", nameEn: "Mizar", ra: 13.398, dec: 54.925, mag: 2.23, constellation: "UMa" },
+      { id: "alkaid", nameCn: "摇光", nameEn: "Alkaid", ra: 13.792, dec: 49.313, mag: 1.86, constellation: "UMa" },
+      { id: "denebola", nameCn: "五帝座一", nameEn: "Denebola", ra: 11.818, dec: 14.572, mag: 2.14, constellation: "Leo" },
+      { id: "alpheratz", nameCn: "室宿一", nameEn: "Alpheratz", ra: 0.14, dec: 29.09, mag: 2.06, constellation: "And" },
+      { id: "mirach", nameCn: "奎宿九", nameEn: "Mirach", ra: 1.163, dec: 35.62, mag: 2.05, constellation: "And" },
+      { id: "hamal", nameCn: "娄宿三", nameEn: "Hamal", ra: 2.119, dec: 23.462, mag: 2.01, constellation: "Ari" },
+      { id: "rasalhague", nameCn: "候（蛇夫座α）", nameEn: "Rasalhague", ra: 17.582, dec: 12.56, mag: 2.08, constellation: "Oph" },
+      { id: "shaula", nameCn: "尾宿八", nameEn: "Shaula", ra: 17.56, dec: -37.103, mag: 1.62, constellation: "Sco" },
+      { id: "sargas", nameCn: "尾宿四", nameEn: "Sargas", ra: 17.622, dec: -42.997, mag: 1.86, constellation: "Sco" },
+      { id: "gacrux", nameCn: "十字架一", nameEn: "Gacrux", ra: 12.519, dec: -57.113, mag: 1.63, constellation: "Cru" },
+      { id: "delta_cru", nameCn: "十字架三", nameEn: "Delta Crucis", ra: 12.252, dec: -58.748, mag: 2.79, constellation: "Cru" }
+    ];
+
+    const CONSTELLATION_LINES = [
+      ["betelgeuse", "bellatrix"], ["bellatrix", "rigel"], ["rigel", "saiph"], ["saiph", "alnitak"], ["alnitak", "alnilam"], ["alnilam", "betelgeuse"],
+      ["dubhe", "merak"], ["merak", "phecda"], ["phecda", "megrez"], ["megrez", "alioth"], ["alioth", "mizar"], ["mizar", "alkaid"],
+      ["castor", "pollux"], ["aldebaran", "capella"], ["regulus", "denebola"],
+      ["antares", "shaula"], ["shaula", "sargas"],
+      ["vega", "altair"], ["altair", "deneb"],
+      ["acrux", "gacrux"], ["gacrux", "delta_cru"], ["delta_cru", "acrux"],
+      ["alpheratz", "mirach"], ["mirach", "hamal"]
+    ];
+
+    const STAR_BY_ID = new Map(STAR_DATA.map((s) => [s.id, s]));
+    const MONTH_CN = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+    const MAP_BOUNDS = { lonMin: 73, lonMax: 135, latMin: 18, latMax: 54 };
+
+    const PROVINCE_BBOX = [
+      { id: "beijing", nameCn: "北京", minLon: 115.7, maxLon: 117.5, minLat: 39.4, maxLat: 41.1 },
+      { id: "tianjin", nameCn: "天津", minLon: 116.7, maxLon: 118.1, minLat: 38.6, maxLat: 40.3 },
+      { id: "hebei", nameCn: "河北", minLon: 113.5, maxLon: 119.9, minLat: 36.0, maxLat: 42.6 },
+      { id: "shanxi", nameCn: "山西", minLon: 110.2, maxLon: 114.6, minLat: 34.5, maxLat: 40.8 },
+      { id: "inner_mongolia", nameCn: "内蒙古", minLon: 97.0, maxLon: 126.1, minLat: 37.4, maxLat: 53.3 },
+      { id: "liaoning", nameCn: "辽宁", minLon: 118.5, maxLon: 125.8, minLat: 38.7, maxLat: 43.4 },
+      { id: "jilin", nameCn: "吉林", minLon: 121.6, maxLon: 131.3, minLat: 40.9, maxLat: 46.3 },
+      { id: "heilongjiang", nameCn: "黑龙江", minLon: 121.0, maxLon: 135.1, minLat: 43.4, maxLat: 53.5 },
+      { id: "shanghai", nameCn: "上海", minLon: 120.9, maxLon: 122.1, minLat: 30.7, maxLat: 31.9 },
+      { id: "jiangsu", nameCn: "江苏", minLon: 116.3, maxLon: 121.9, minLat: 30.8, maxLat: 35.2 },
+      { id: "zhejiang", nameCn: "浙江", minLon: 118.0, maxLon: 123.0, minLat: 27.1, maxLat: 31.4 },
+      { id: "anhui", nameCn: "安徽", minLon: 114.9, maxLon: 119.6, minLat: 29.4, maxLat: 34.9 },
+      { id: "fujian", nameCn: "福建", minLon: 116.5, maxLon: 120.9, minLat: 23.4, maxLat: 28.5 },
+      { id: "jiangxi", nameCn: "江西", minLon: 113.5, maxLon: 118.5, minLat: 24.4, maxLat: 30.2 },
+      { id: "shandong", nameCn: "山东", minLon: 114.8, maxLon: 122.7, minLat: 34.3, maxLat: 38.5 },
+      { id: "henan", nameCn: "河南", minLon: 110.4, maxLon: 116.7, minLat: 31.3, maxLat: 36.4 },
+      { id: "hubei", nameCn: "湖北", minLon: 108.3, maxLon: 116.2, minLat: 29.0, maxLat: 33.3 },
+      { id: "hunan", nameCn: "湖南", minLon: 108.8, maxLon: 114.3, minLat: 24.6, maxLat: 30.1 },
+      { id: "guangdong", nameCn: "广东", minLon: 109.5, maxLon: 117.4, minLat: 20.1, maxLat: 25.7 },
+      { id: "guangxi", nameCn: "广西", minLon: 104.4, maxLon: 112.1, minLat: 20.9, maxLat: 26.4 },
+      { id: "hainan", nameCn: "海南", minLon: 108.6, maxLon: 111.3, minLat: 18.0, maxLat: 20.4 },
+      { id: "chongqing", nameCn: "重庆", minLon: 105.3, maxLon: 110.2, minLat: 28.1, maxLat: 32.2 },
+      { id: "sichuan", nameCn: "四川", minLon: 97.2, maxLon: 108.6, minLat: 26.0, maxLat: 34.3 },
+      { id: "guizhou", nameCn: "贵州", minLon: 103.6, maxLon: 109.6, minLat: 24.5, maxLat: 29.3 },
+      { id: "yunnan", nameCn: "云南", minLon: 97.5, maxLon: 106.5, minLat: 21.1, maxLat: 29.3 },
+      { id: "tibet", nameCn: "西藏", minLon: 78.3, maxLon: 99.0, minLat: 26.0, maxLat: 36.6 },
+      { id: "shaanxi", nameCn: "陕西", minLon: 105.5, maxLon: 111.3, minLat: 31.2, maxLat: 39.6 },
+      { id: "gansu", nameCn: "甘肃", minLon: 92.3, maxLon: 108.7, minLat: 32.5, maxLat: 42.9 },
+      { id: "qinghai", nameCn: "青海", minLon: 89.5, maxLon: 103.1, minLat: 31.6, maxLat: 39.2 },
+      { id: "ningxia", nameCn: "宁夏", minLon: 104.3, maxLon: 107.7, minLat: 35.0, maxLat: 39.4 },
+      { id: "xinjiang", nameCn: "新疆", minLon: 73.4, maxLon: 96.4, minLat: 34.3, maxLat: 49.2 }
+    ];
+
+    const CITY_PRESETS = [
+      { id: "beijing", province: "北京", cityCn: "北京", lat: 39.9042, lng: 116.4074 },
+      { id: "shanghai", province: "上海", cityCn: "上海", lat: 31.2304, lng: 121.4737 },
+      { id: "shenzhen_baoan", province: "广东", cityCn: "深圳宝安（明湾附近）", lat: 22.58, lng: 113.87, isSchoolDefault: true },
+      { id: "guangzhou", province: "广东", cityCn: "广州", lat: 23.1291, lng: 113.2644 },
+      { id: "urumqi", province: "新疆", cityCn: "乌鲁木齐", lat: 43.8256, lng: 87.6168 },
+      { id: "lhasa", province: "西藏", cityCn: "拉萨", lat: 29.652, lng: 91.1721 },
+      { id: "harbin", province: "黑龙江", cityCn: "哈尔滨", lat: 45.7569, lng: 126.6424 },
+      { id: "haikou", province: "海南", cityCn: "海口", lat: 20.044, lng: 110.1983 }
+    ];
+
+    function bboxToPolygon(rect) {
+      const dx = (rect.maxLon - rect.minLon) * 0.12;
+      const dy = (rect.maxLat - rect.minLat) * 0.12;
+      return [
+        [rect.minLon, rect.minLat + dy],
+        [rect.minLon + dx, rect.maxLat],
+        [rect.maxLon - dx, rect.maxLat],
+        [rect.maxLon, rect.maxLat - dy],
+        [rect.maxLon - dx, rect.minLat],
+        [rect.minLon + dx, rect.minLat]
+      ];
+    }
+
+    const FALLBACK_PROVINCE_POLYGONS = PROVINCE_BBOX.map((rect) => ({
+      id: rect.id,
+      nameCn: rect.nameCn,
+      minLon: rect.minLon,
+      maxLon: rect.maxLon,
+      minLat: rect.minLat,
+      maxLat: rect.maxLat,
+      area: Math.max(0.0001, (rect.maxLon - rect.minLon) * (rect.maxLat - rect.minLat)),
+      polygons: [bboxToPolygon(rect)]
+    }));
+
+    const ONLINE_MAP_URLS = [
+      "https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/json/china.json",
+      "https://unpkg.com/echarts@4.9.0/map/json/china.json",
+      "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json",
+      "https://geo.datav.aliyun.com/areas_v3/bound/geojson?code=100000_full"
+    ];
+
+    let mapPolygons = FALLBACK_PROVINCE_POLYGONS.slice();
+    let mapSource = "fallback";
+
+    function normalizeProvinceName(name) {
+      if (!name) return "中国";
+      const raw = String(name).trim();
+      const keepers = {
+        "内蒙古自治区": "内蒙古",
+        "广西壮族自治区": "广西",
+        "西藏自治区": "西藏",
+        "宁夏回族自治区": "宁夏",
+        "新疆维吾尔自治区": "新疆",
+        "香港特别行政区": "香港",
+        "澳门特别行政区": "澳门"
+      };
+      if (keepers[raw]) return keepers[raw];
+      return raw.replace(/特别行政区|自治区|省|市/g, "").trim() || raw;
+    }
+
+    function polygonArea(ring) {
+      let area = 0;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+        area += ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
+      }
+      return Math.abs(area) * 0.5;
+    }
+
+    function geoJSONToProvincePolygons(geojson) {
+      const features = Array.isArray(geojson && geojson.features) ? geojson.features : [];
+      const out = [];
+      for (const feature of features) {
+        const geom = feature && feature.geometry;
+        if (!geom || !geom.type || !Array.isArray(geom.coordinates)) continue;
+        const nameRaw = (feature.properties && (feature.properties.name || feature.properties.fullname || feature.properties.NAME)) || "中国";
+        const nameCn = normalizeProvinceName(nameRaw);
+        const rings = [];
+        if (geom.type === "Polygon") {
+          if (Array.isArray(geom.coordinates[0])) rings.push(geom.coordinates[0]);
+        } else if (geom.type === "MultiPolygon") {
+          for (const poly of geom.coordinates) {
+            if (Array.isArray(poly) && Array.isArray(poly[0])) rings.push(poly[0]);
+          }
+        } else {
+          continue;
+        }
+
+        const cleanRings = rings
+          .map((ring) => ring.filter((pt) => Array.isArray(pt) && pt.length >= 2 && Number.isFinite(pt[0]) && Number.isFinite(pt[1])))
+          .filter((ring) => ring.length >= 3);
+        if (!cleanRings.length) continue;
+
+        let minLon = Infinity;
+        let maxLon = -Infinity;
+        let minLat = Infinity;
+        let maxLat = -Infinity;
+        let area = 0;
+        for (const ring of cleanRings) {
+          area += polygonArea(ring);
+          for (const pt of ring) {
+            const lon = pt[0];
+            const lat = pt[1];
+            if (lon < minLon) minLon = lon;
+            if (lon > maxLon) maxLon = lon;
+            if (lat < minLat) minLat = lat;
+            if (lat > maxLat) maxLat = lat;
+          }
+        }
+
+        out.push({
+          id: feature.id || nameCn,
+          nameCn,
+          minLon,
+          maxLon,
+          minLat,
+          maxLat,
+          area: Math.max(area, 0.0001),
+          polygons: cleanRings
+        });
+      }
+      return out;
+    }
+
+    const appState = {
+      date: new Date(2026, 0, 15),
+      hour: 21,
+      lat: 22.58,
+      lng: 113.87,
+      mode: "combined",
+      playbackSpeed: 2,
+      uiLang: "bilingual",
+      showLabels: true,
+      showConstellations: true,
+      playing: false,
+      selectedProvince: "广东",
+      selectedCityLabel: "深圳宝安（明湾附近）",
+      selectionSource: "map_city",
+      mapHint: "点击省份区域或城市点，切换观测地点。"
+    };
+
+    const controls = {
+      dateInput: document.getElementById("dateInput"),
+      monthSlider: document.getElementById("monthSlider"),
+      hourSlider: document.getElementById("hourSlider"),
+      modeSelect: document.getElementById("modeSelect"),
+      speedSelect: document.getElementById("speedSelect"),
+      playBtn: document.getElementById("playBtn"),
+      latInput: document.getElementById("latInput"),
+      lngInput: document.getElementById("lngInput"),
+      locationLabel: document.getElementById("locationLabel"),
+      mapHint: document.getElementById("mapHint"),
+      showLabels: document.getElementById("showLabels"),
+      showConstellations: document.getElementById("showConstellations"),
+      monthReadout: document.getElementById("monthReadout"),
+      hourReadout: document.getElementById("hourReadout"),
+      modeHint: document.getElementById("modeHint"),
+      insight: document.getElementById("insight"),
+      skyMeta: document.getElementById("skyMeta"),
+      orbitMeta: document.getElementById("orbitMeta"),
+      explainLine1: document.getElementById("explainLine1"),
+      explainLine2: document.getElementById("explainLine2"),
+      quizForm: document.getElementById("quizForm"),
+      quizResult: document.getElementById("quizResult")
+    };
+
+    const skyCanvas = document.getElementById("skyCanvas");
+    const orbitCanvas = document.getElementById("orbitCanvas");
+    const mapCanvas = document.getElementById("mapCanvas");
+    const DEG = Math.PI / 180;
+    const TAU = Math.PI * 2;
+
+    const hazePoints = buildBackgroundHaze(260);
+    let lastFrame = 0;
+
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function formatDateInputValue(date) {
+      return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+    }
+
+    function parseDateInputValue(value) {
+      const parts = value.split("-").map((n) => Number(n));
+      if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) {
+        return null;
+      }
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function monthName(monthIndex) {
+      return MONTH_CN[monthIndex] + ` | Month ${monthIndex + 1}`;
+    }
+
+    function formatHour(hour) {
+      const h = Math.floor(hour);
+      const m = Math.round((hour - h) * 60);
+      return `${pad2(h)}:${pad2(m)} | Local Time`;
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function addDays(base, days) {
+      return new Date(base.getTime() + days * 86400000);
+    }
+
+    function getDayOfYear(date) {
+      const start = new Date(date.getFullYear(), 0, 1);
+      const ms = date - start;
+      return Math.floor(ms / 86400000) + 1;
+    }
+
+    function buildObservationDate(baseDate, hour) {
+      const whole = Math.floor(hour);
+      const minute = Math.round((hour - whole) * 60);
+      return new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), whole, minute, 0, 0);
+    }
+
+    function getEffectiveObservation(state) {
+      let usedDate = new Date(state.date.getFullYear(), state.date.getMonth(), state.date.getDate());
+      let usedHour = state.hour;
+      let lockedText = "";
+
+      if (state.mode === "rotation_only") {
+        usedDate = new Date(state.date.getFullYear(), 0, 1);
+        lockedText = "Rotation Only: orbit date fixed at Jan 1, month effect removed.";
+      } else if (state.mode === "revolution_only") {
+        usedHour = 21;
+        lockedText = "Revolution Only: local hour locked at 21:00, showing month-driven shift.";
+      }
+
+      return {
+        date: usedDate,
+        hour: usedHour,
+        dateTime: buildObservationDate(usedDate, usedHour),
+        lockedText
+      };
+    }
+
+    // Required function
+    function computeJulianDate(date) {
+      return date.getTime() / 86400000 + 2440587.5;
+    }
+
+    // Required function
+    function computeLocalSiderealTime(jd, longitudeDeg) {
+      const t = (jd - 2451545.0) / 36525;
+      let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * t * t - (t * t * t) / 38710000;
+      gmst = ((gmst % 360) + 360) % 360;
+      let lstDeg = gmst + longitudeDeg;
+      lstDeg = ((lstDeg % 360) + 360) % 360;
+      return lstDeg / 15;
+    }
+
+    // Required function
+    function projectRaDecToDome(raHour, decDeg, latDeg, lstHour) {
+      const ra = raHour * 15 * DEG;
+      const dec = decDeg * DEG;
+      const lat = latDeg * DEG;
+      const h = (lstHour - raHour) * 15 * DEG;
+
+      const sinAlt = Math.sin(dec) * Math.sin(lat) + Math.cos(dec) * Math.cos(lat) * Math.cos(h);
+      const alt = Math.asin(clamp(sinAlt, -1, 1));
+      if (alt <= 0) {
+        return null;
+      }
+
+      const y = Math.sin(h);
+      const x = Math.cos(h) * Math.sin(lat) - Math.tan(dec) * Math.cos(lat);
+      let az = Math.atan2(y, x) + Math.PI;
+      if (az < 0) az += TAU;
+      if (az >= TAU) az -= TAU;
+
+      return { alt, az };
+    }
+
+    // Required function
+    function computeEarthOrbitAngle(dayOfYear) {
+      // Set perihelion near Jan 3 at right side of orbit panel.
+      return ((dayOfYear - 3) / 365.2422) * TAU;
+    }
+
+    function projectAltAzToCanvas(altAz, geom) {
+      const normalized = ((((altAz.az - Math.PI) % TAU) + TAU) % TAU) / TAU;
+      const x = (((normalized + 0.5) % 1) * geom.width);
+      const altFactor = Math.pow(altAz.alt / (Math.PI / 2), 0.8);
+      let y = geom.horizonY - altFactor * geom.domeHeight;
+      const edge = Math.abs((x - geom.width / 2) / (geom.width / 2));
+      y += edge * edge * 20;
+      if (y > geom.horizonY) return null;
+      return { x, y };
+    }
+
+    function getStarColor(star) {
+      const palette = ["#f2f6ff", "#d8e9ff", "#ffe6c2", "#fff4d8", "#d9fff6"];
+      const key = Math.abs(hashString(star.id)) % palette.length;
+      return palette[key];
+    }
+
+    function hashString(text) {
+      let h = 0;
+      for (let i = 0; i < text.length; i += 1) {
+        h = (h << 5) - h + text.charCodeAt(i);
+        h |= 0;
+      }
+      return h;
+    }
+
+    function buildBackgroundHaze(count) {
+      const points = [];
+      let seed = 987654321;
+      for (let i = 0; i < count; i += 1) {
+        seed = (1103515245 * seed + 12345) % 2147483648;
+        const r1 = seed / 2147483648;
+        seed = (1103515245 * seed + 12345) % 2147483648;
+        const r2 = seed / 2147483648;
+        seed = (1103515245 * seed + 12345) % 2147483648;
+        const r3 = seed / 2147483648;
+        points.push({ x: r1, y: r2, alpha: 0.15 + r3 * 0.45, size: 0.6 + r3 * 1.6 });
+      }
+      return points;
+    }
+
+    function fitCanvas(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.max(2, Math.floor(rect.width * dpr));
+      const h = Math.max(2, Math.floor(rect.height * dpr));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function buildMapGeom(width, height) {
+      const padX = 10;
+      const padY = 8;
+      return {
+        x: padX,
+        y: padY,
+        w: Math.max(10, width - padX * 2),
+        h: Math.max(10, height - padY * 2),
+        lonMin: MAP_BOUNDS.lonMin,
+        lonMax: MAP_BOUNDS.lonMax,
+        latMin: MAP_BOUNDS.latMin,
+        latMax: MAP_BOUNDS.latMax
+      };
+    }
+
+    // Required function
+    function projectLonLatToMap(lon, lat, mapGeom) {
+      const nx = (lon - mapGeom.lonMin) / (mapGeom.lonMax - mapGeom.lonMin);
+      const ny = (mapGeom.latMax - lat) / (mapGeom.latMax - mapGeom.latMin);
+      return {
+        x: mapGeom.x + nx * mapGeom.w,
+        y: mapGeom.y + ny * mapGeom.h
+      };
+    }
+
+    // Required function
+    function unprojectMapToLonLat(x, y, mapGeom) {
+      const nx = (x - mapGeom.x) / mapGeom.w;
+      const ny = (y - mapGeom.y) / mapGeom.h;
+      return {
+        lon: mapGeom.lonMin + nx * (mapGeom.lonMax - mapGeom.lonMin),
+        lat: mapGeom.latMax - ny * (mapGeom.latMax - mapGeom.latMin)
+      };
+    }
+
+    function pointInPolygon(lon, lat, polygon) {
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+        const xi = polygon[i][0];
+        const yi = polygon[i][1];
+        const xj = polygon[j][0];
+        const yj = polygon[j][1];
+        const intersect = ((yi > lat) !== (yj > lat)) && (lon < ((xj - xi) * (lat - yi)) / ((yj - yi) || 1e-9) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    // Required function
+    function pointInProvince(lon, lat, provincePolygons) {
+      const hits = [];
+      for (const province of provincePolygons) {
+        for (const ring of province.polygons) {
+          if (pointInPolygon(lon, lat, ring)) {
+            hits.push(province);
+            break;
+          }
+        }
+      }
+      if (!hits.length) return null;
+      hits.sort((a, b) => a.area - b.area);
+      return hits[0];
+    }
+
+    function createCityMarkers(mapGeom) {
+      return CITY_PRESETS.map((city) => {
+        const p = projectLonLatToMap(city.lng, city.lat, mapGeom);
+        return { ...city, x: p.x, y: p.y };
+      });
+    }
+
+    // Required function
+    function findNearestCityMarker(x, y, markers, thresholdPx) {
+      let best = null;
+      let bestDist = Infinity;
+      for (const m of markers) {
+        const d = Math.hypot(x - m.x, y - m.y);
+        if (d <= thresholdPx && d < bestDist) {
+          bestDist = d;
+          best = m;
+        }
+      }
+      return best;
+    }
+
+    function drawProvincePath(ctx, province, mapGeom) {
+      for (const ring of province.polygons) {
+        if (!ring.length) continue;
+        ring.forEach((pt, idx) => {
+          const p = projectLonLatToMap(pt[0], pt[1], mapGeom);
+          if (idx === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        });
+        ctx.closePath();
+      }
+    }
+
+    function provinceColor(nameCn) {
+      const palette = ["#143458", "#183d66", "#1e466f", "#194160", "#1f4a73"];
+      const idx = Math.abs(hashString(nameCn)) % palette.length;
+      return palette[idx];
+    }
+
+    function setLocation(lat, lng, options = {}) {
+      const source = options.source || "manual_input";
+      const cityLabel = options.cityLabel || (source === "manual_input" ? "手动输入" : "自定义点");
+      appState.lat = clamp(lat, -89, 89);
+      appState.lng = clamp(lng, -180, 180);
+      const province = options.provinceName
+        ? { nameCn: options.provinceName }
+        : pointInProvince(appState.lng, appState.lat, mapPolygons);
+      appState.selectedProvince = province ? province.nameCn : "中国";
+      appState.selectedCityLabel = cityLabel;
+      appState.selectionSource = source;
+    }
+
+    // Required function
+    function renderChinaMap(ctx, mapState) {
+      const { width, height, mapGeom, markers } = mapState;
+
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, "#0a1a30");
+      bg.addColorStop(1, "#0d213d");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "rgba(114, 151, 186, 0.2)";
+      ctx.lineWidth = 1;
+      for (let lon = 75; lon <= 135; lon += 10) {
+        const p1 = projectLonLatToMap(lon, mapGeom.latMin, mapGeom);
+        const p2 = projectLonLatToMap(lon, mapGeom.latMax, mapGeom);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+      for (let lat = 20; lat <= 54; lat += 8) {
+        const p1 = projectLonLatToMap(mapGeom.lonMin, lat, mapGeom);
+        const p2 = projectLonLatToMap(mapGeom.lonMax, lat, mapGeom);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+
+      for (const province of mapState.provinces) {
+        const isSel = province.nameCn === mapState.selectedProvince;
+        ctx.beginPath();
+        drawProvincePath(ctx, province, mapGeom);
+        ctx.fillStyle = isSel ? "rgba(244, 184, 106, 0.42)" : provinceColor(province.nameCn);
+        ctx.fill();
+        ctx.strokeStyle = isSel ? "rgba(255, 223, 173, 0.95)" : "rgba(133, 170, 204, 0.34)";
+        ctx.lineWidth = isSel ? 1.8 : 0.85;
+        ctx.stroke();
+      }
+
+      for (const marker of markers) {
+        const isSel = marker.cityCn === mapState.selectedCityLabel;
+        ctx.beginPath();
+        ctx.fillStyle = isSel ? "#ffe4b8" : "#92dcff";
+        ctx.arc(marker.x, marker.y, isSel ? 4.8 : 3.3, 0, TAU);
+        ctx.fill();
+
+        ctx.fillStyle = "rgba(219, 236, 251, 0.92)";
+        ctx.font = '10px "Avenir Next", "Trebuchet MS", "PingFang SC", sans-serif';
+        ctx.fillText(marker.cityCn.replace("（明湾附近）", ""), marker.x + 5, marker.y - 4);
+      }
+
+      const selected = projectLonLatToMap(mapState.selectedLng, mapState.selectedLat, mapGeom);
+      ctx.strokeStyle = "rgba(255, 215, 142, 0.95)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(selected.x, selected.y, 8, 0, TAU);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(selected.x - 11, selected.y);
+      ctx.lineTo(selected.x + 11, selected.y);
+      ctx.moveTo(selected.x, selected.y - 11);
+      ctx.lineTo(selected.x, selected.y + 11);
+      ctx.stroke();
+    }
+
+    async function loadChinaProvinceMap() {
+      for (const url of ONLINE_MAP_URLS) {
+        try {
+          const res = await fetch(url, { mode: "cors", cache: "force-cache", referrerPolicy: "no-referrer" });
+          if (!res.ok) continue;
+          const json = await res.json();
+          const parsed = geoJSONToProvincePolygons(json);
+          if (parsed.length >= 20) {
+            mapPolygons = parsed;
+            mapSource = "online";
+            appState.mapHint = "已加载精细中国省界地图（在线）。";
+            syncControlsFromState();
+            renderAll();
+            return;
+          }
+        } catch (err) {
+          // Try next URL
+        }
+      }
+      mapSource = "fallback";
+      appState.mapHint = "当前使用离线简化地图；联网后将自动尝试更精细边界。";
+      syncControlsFromState();
+      renderAll();
+    }
+
+    function computeVisibleStars(lstHour, latDeg, geom) {
+      const projected = [];
+      for (const star of STAR_DATA) {
+        const altAz = projectRaDecToDome(star.ra, star.dec, latDeg, lstHour);
+        if (!altAz) continue;
+        const xy = projectAltAzToCanvas(altAz, geom);
+        if (!xy) continue;
+        projected.push({
+          star,
+          alt: altAz.alt,
+          az: altAz.az,
+          x: xy.x,
+          y: xy.y
+        });
+      }
+      return projected;
+    }
+
+    function drawSkyBackdrop(ctx, geom, now) {
+      const g = ctx.createLinearGradient(0, 0, 0, geom.horizonY);
+      g.addColorStop(0, "#041634");
+      g.addColorStop(0.4, "#0c2a4d");
+      g.addColorStop(0.85, "#35597d");
+      g.addColorStop(1, "#5c6c78");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, geom.width, geom.height);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, geom.width, geom.horizonY);
+      ctx.clip();
+
+      for (const p of hazePoints) {
+        const twinkle = 0.65 + 0.35 * Math.sin(now * 0.0012 + p.x * 8 + p.y * 5);
+        ctx.globalAlpha = p.alpha * twinkle;
+        ctx.fillStyle = "#cde0ff";
+        ctx.beginPath();
+        ctx.arc(p.x * geom.width, p.y * geom.horizonY, p.size, 0, TAU);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      const horizonGrad = ctx.createLinearGradient(0, geom.horizonY - 36, 0, geom.horizonY + 24);
+      horizonGrad.addColorStop(0, "rgba(114, 149, 177, 0)");
+      horizonGrad.addColorStop(1, "rgba(185, 201, 210, 0.28)");
+      ctx.fillStyle = horizonGrad;
+      ctx.fillRect(0, geom.horizonY - 42, geom.width, 58);
+
+      ctx.fillStyle = "#121f32";
+      ctx.beginPath();
+      ctx.moveTo(0, geom.height);
+      ctx.lineTo(0, geom.horizonY + 4);
+      const peaks = 10;
+      for (let i = 0; i <= peaks; i += 1) {
+        const x = (i / peaks) * geom.width;
+        const y = geom.horizonY + 4 + Math.sin(i * 1.35) * 6 + (i % 3 === 0 ? 3 : 0);
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(geom.width, geom.height);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawSkyGrid(ctx, geom) {
+      ctx.strokeStyle = "rgba(148, 181, 211, 0.14)";
+      ctx.lineWidth = 1;
+      for (const alt of [15, 30, 45, 60, 75]) {
+        const altFactor = Math.pow(alt / 90, 0.8);
+        const yCore = geom.horizonY - altFactor * geom.domeHeight;
+        const yEdge = yCore + 20;
+        ctx.beginPath();
+        ctx.moveTo(0, yEdge);
+        ctx.quadraticCurveTo(geom.width * 0.5, yCore, geom.width, yEdge);
+        ctx.stroke();
+      }
+
+      for (let az = 0; az < 360; az += 30) {
+        const normalized = ((((az * DEG - Math.PI) % TAU) + TAU) % TAU) / TAU;
+        const x = (((normalized + 0.5) % 1) * geom.width);
+        const edge = Math.abs((x - geom.width / 2) / (geom.width / 2));
+        const topY = geom.horizonY - geom.domeHeight + edge * edge * 18;
+        ctx.beginPath();
+        ctx.moveTo(x, geom.horizonY);
+        ctx.lineTo(x, topY);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = "rgba(225, 236, 248, 0.45)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(0, geom.horizonY);
+      ctx.lineTo(geom.width, geom.horizonY);
+      ctx.stroke();
+
+      ctx.fillStyle = "#dbe9f7";
+      ctx.font = '12px "Avenir Next", "Trebuchet MS", "PingFang SC", sans-serif';
+      ctx.fillText("N 北", 6, geom.horizonY - 6);
+      ctx.fillText("E 东", geom.width * 0.25 - 12, geom.horizonY - 6);
+      ctx.fillText("S 南", geom.width * 0.5 - 12, geom.horizonY - 6);
+      ctx.fillText("W 西", geom.width * 0.75 - 12, geom.horizonY - 6);
+      ctx.fillText("N 北", geom.width - 36, geom.horizonY - 6);
+    }
+
+    function drawConstellationLines(ctx, visibleById, width) {
+      ctx.strokeStyle = "rgba(118, 171, 212, 0.45)";
+      ctx.lineWidth = 1;
+      for (const [a, b] of CONSTELLATION_LINES) {
+        const s1 = visibleById.get(a);
+        const s2 = visibleById.get(b);
+        if (!s1 || !s2) continue;
+        if (Math.abs(s1.x - s2.x) > width * 0.45) continue;
+        ctx.beginPath();
+        ctx.moveTo(s1.x, s1.y);
+        ctx.lineTo(s2.x, s2.y);
+        ctx.stroke();
+      }
+    }
+
+    function drawStars(ctx, visibleStars, now, showLabels) {
+      const labelMagLimit = 6;
+      for (const p of visibleStars) {
+        const star = p.star;
+        const size = clamp(4.4 - star.mag * 0.92, 0.8, 5.2);
+        const pulse = 0.82 + 0.18 * Math.sin(now * 0.002 + hashString(star.id) * 0.01);
+        const halo = size * 2.3;
+
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, halo);
+        glow.addColorStop(0, "rgba(255,255,255,0.95)");
+        glow.addColorStop(0.35, "rgba(225,240,255,0.45)");
+        glow.addColorStop(1, "rgba(225,240,255,0)");
+        ctx.fillStyle = glow;
+        ctx.globalAlpha = pulse;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, halo, 0, TAU);
+        ctx.fill();
+
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = getStarColor(star);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, size, 0, TAU);
+        ctx.fill();
+
+        if (showLabels && star.mag <= labelMagLimit) {
+          const cn = star.nameCn && star.nameCn.trim() ? star.nameCn.trim() : star.nameEn;
+          const en = star.nameEn && star.nameEn.trim() ? star.nameEn.trim() : cn;
+          ctx.fillStyle = "rgba(223, 237, 250, 0.95)";
+          ctx.font = '11px "Avenir Next", "Trebuchet MS", "PingFang SC", sans-serif';
+          ctx.fillText(`${cn}/${en}`, p.x + 6, p.y - 4);
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Required function
+    function renderSkyDome(ctx, visibleStars, overlays) {
+      const { geom, now } = overlays;
+      drawSkyBackdrop(ctx, geom, now);
+      drawSkyGrid(ctx, geom);
+
+      const visibleById = new Map();
+      for (const p of visibleStars) {
+        visibleById.set(p.star.id, p);
+      }
+
+      if (appState.showConstellations) {
+        drawConstellationLines(ctx, visibleById, geom.width);
+      }
+
+      drawStars(ctx, visibleStars, now, appState.showLabels);
+    }
+
+    function getOrbitPoint(angle, orbitModel) {
+      return {
+        x: orbitModel.cx + Math.cos(angle) * orbitModel.major,
+        y: orbitModel.cy - Math.sin(angle) * orbitModel.minor
+      };
+    }
+
+    function drawOrbitMarkers(ctx, orbitModel) {
+      const marks = [
+        { day: 3, label: "Jan / 1月" },
+        { day: 94, label: "Apr / 4月" },
+        { day: 185, label: "Jul / 7月" },
+        { day: 277, label: "Oct / 10月" }
+      ];
+      ctx.fillStyle = "rgba(192, 216, 241, 0.9)";
+      ctx.font = '12px "Avenir Next", "Trebuchet MS", "PingFang SC", sans-serif';
+      for (const m of marks) {
+        const a = computeEarthOrbitAngle(m.day);
+        const p = getOrbitPoint(a, orbitModel);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, TAU);
+        ctx.fill();
+        ctx.fillText(m.label, p.x + 7, p.y - 7);
+      }
+    }
+
+    function rotateVector(v, angle) {
+      const c = Math.cos(angle);
+      const s = Math.sin(angle);
+      return { x: v.x * c - v.y * s, y: v.x * s + v.y * c };
+    }
+
+    // Required function
+    function renderOrbitPanel(ctx, viewState, state) {
+      const w = viewState.width;
+      const h = viewState.height;
+      const cx = w * 0.52;
+      const cy = h * 0.53;
+      const major = Math.min(w, h) * 0.335;
+      const visualEcc = 0.28;
+      const minor = major * Math.sqrt(1 - visualEcc * visualEcc);
+      // Horizontal ellipse like textbook diagrams: Jan near right perihelion, Jul near left aphelion.
+      const sunX = cx + major * visualEcc;
+      const sunY = cy;
+      const orbitModel = { cx, cy, major, minor, e: visualEcc, sunX, sunY };
+
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, "#081b35");
+      bg.addColorStop(1, "#0d213e");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = "rgba(102, 152, 196, 0.48)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, major, minor, 0, 0, TAU);
+      ctx.stroke();
+
+      drawOrbitMarkers(ctx, orbitModel);
+
+      const sunG = ctx.createRadialGradient(sunX, sunY, 2, sunX, sunY, 24);
+      sunG.addColorStop(0, "#fff6d8");
+      sunG.addColorStop(0.55, "#f4c772");
+      sunG.addColorStop(1, "rgba(244, 199, 114, 0)");
+      ctx.fillStyle = sunG;
+      ctx.beginPath();
+      ctx.arc(sunX, sunY, 24, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = "#ffd58e";
+      ctx.beginPath();
+      ctx.arc(sunX, sunY, 11, 0, TAU);
+      ctx.fill();
+
+      const earthA = viewState.earthOrbitAngle;
+      const earthP = getOrbitPoint(earthA, orbitModel);
+      const ex = earthP.x;
+      const ey = earthP.y;
+
+      ctx.fillStyle = "#72c3e4";
+      ctx.beginPath();
+      ctx.arc(ex, ey, 9, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = "#d2effa";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(ex, ey, 12, 0, TAU);
+      ctx.stroke();
+
+      const axialTiltToOrbitNormalDeg = 23.5;
+      const axisAngleFromHorizontal = (90 - axialTiltToOrbitNormalDeg) * DEG;
+      const axisDx = Math.cos(axisAngleFromHorizontal) * 16;
+      const axisDy = -Math.sin(axisAngleFromHorizontal) * 16;
+      ctx.strokeStyle = "#b0d7ef";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(ex - axisDx, ey - axisDy);
+      ctx.lineTo(ex + axisDx, ey + axisDy);
+      ctx.stroke();
+
+      const sunVec = { x: sunX - ex, y: sunY - ey };
+      const sunLen = Math.hypot(sunVec.x, sunVec.y) || 1;
+      const antiSun = { x: -sunVec.x / sunLen, y: -sunVec.y / sunLen };
+      const spinAngle = (viewState.effectiveHour / 24) * TAU;
+      const look = rotateVector(antiSun, spinAngle);
+
+      ctx.strokeStyle = "#7de6c7";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(ex, ey);
+      ctx.lineTo(ex + look.x * 54, ey + look.y * 54);
+      ctx.stroke();
+
+      const tipX = ex + look.x * 54;
+      const tipY = ey + look.y * 54;
+      const left = rotateVector({ x: look.x, y: look.y }, 2.65);
+      const right = rotateVector({ x: look.x, y: look.y }, -2.65);
+      ctx.fillStyle = "#7de6c7";
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(tipX + left.x * 8, tipY + left.y * 8);
+      ctx.lineTo(tipX + right.x * 8, tipY + right.y * 8);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = '12px "Avenir Next", "Trebuchet MS", "PingFang SC", sans-serif';
+      ctx.fillStyle = "#c8dff4";
+      ctx.fillText("Sun | 太阳", sunX + 18, sunY - 12);
+      const earthLabelDx = ex >= cx ? 12 : -76;
+      const earthLabelDy = ey <= cy ? -8 : 16;
+      ctx.fillText("Earth | 地球", ex + earthLabelDx, ey + earthLabelDy);
+      const nightDx = look.x >= 0 ? 8 : -240;
+      const nightDy = look.y >= 0 ? 14 : -10;
+      ctx.fillText("Night-view direction | 夜空观测方向", tipX + nightDx, tipY + nightDy);
+
+      // Left-top duplicated text removed to avoid overlap with night-view label.
+    }
+
+    function updateTextPanels(viewState, obs) {
+      const m = appState.date.getMonth();
+      const monthShift = (getDayOfYear(appState.date) - 1) * 0.9856;
+      controls.modeHint.innerHTML =
+        `当前模式 Current Mode: <strong>${appState.mode}</strong><br>` +
+        `有效观测时间 Effective: ${formatDateInputValue(obs.date)} ${formatHour(obs.hour).split(" | ")[0]}<br>` +
+        `${obs.lockedText || "Combined mode: both month/date and hour affect the sky."}`;
+
+      controls.insight.innerHTML =
+        `同一本地时刻看 ${monthName(m)}，相对1月夜空朝向大约偏移 <strong>${monthShift.toFixed(1)}°</strong>（近似）.<br>` +
+        `At a fixed clock time, Earth has moved along orbit, so night side points to a different star field.`;
+
+      controls.explainLine1.textContent =
+        "中文：当你固定地点和时刻（比如每月21:00）比较夜空，看到的星空会随月份系统性变化，这主要来自地球绕太阳公转。";
+      controls.explainLine2.textContent =
+        "English: At the same location and local clock time, monthly sky changes are primarily caused by Earth's revolution around the Sun.";
+
+      controls.skyMeta.textContent =
+        `${formatDateInputValue(appState.date)}  ${formatHour(appState.hour).split(" | ")[0]}  ${appState.selectedCityLabel}  Lat ${appState.lat.toFixed(2)}°  LST ${viewState.lstHour.toFixed(2)}h`;
+      controls.orbitMeta.textContent =
+        `Date ${viewState.observationDate} | Day ${viewState.dayOfYear} | Orbit ${(viewState.earthOrbitAngle / DEG).toFixed(1)}° | Effective hour ${formatHour(obs.hour).split(" | ")[0]}`;
+    }
+
+    function updateControlLocks() {
+      const lockDate = appState.mode === "rotation_only";
+      const lockHour = appState.mode === "revolution_only";
+      controls.dateInput.disabled = lockDate;
+      controls.monthSlider.disabled = lockDate;
+      controls.hourSlider.disabled = lockHour;
+    }
+
+    function renderAll(now = performance.now()) {
+      const obs = getEffectiveObservation(appState);
+      const jd = computeJulianDate(obs.dateTime);
+      const lstHour = computeLocalSiderealTime(jd, appState.lng);
+      const dayOfYear = getDayOfYear(obs.date);
+      const earthOrbitAngle = computeEarthOrbitAngle(dayOfYear);
+
+      const skyFit = fitCanvas(skyCanvas);
+      const skyCtx = skyFit.ctx;
+      const skyGeom = {
+        width: skyFit.width,
+        height: skyFit.height,
+        horizonY: skyFit.height * 0.84,
+        domeHeight: skyFit.height * 0.72
+      };
+      skyCtx.clearRect(0, 0, skyFit.width, skyFit.height);
+
+      const visibleStars = computeVisibleStars(lstHour, appState.lat, skyGeom);
+      renderSkyDome(skyCtx, visibleStars, { geom: skyGeom, now });
+
+      const orbitFit = fitCanvas(orbitCanvas);
+      const orbitCtx = orbitFit.ctx;
+      orbitCtx.clearRect(0, 0, orbitFit.width, orbitFit.height);
+
+      const viewState = {
+        width: orbitFit.width,
+        height: orbitFit.height,
+        lstHour,
+        dayOfYear,
+        earthOrbitAngle,
+        effectiveHour: obs.hour,
+        observationDate: formatDateInputValue(appState.date)
+      };
+      renderOrbitPanel(orbitCtx, viewState, appState);
+
+      const mapFit = fitCanvas(mapCanvas);
+      const mapCtx = mapFit.ctx;
+      mapCtx.clearRect(0, 0, mapFit.width, mapFit.height);
+      const mapGeom = buildMapGeom(mapFit.width, mapFit.height);
+      const markers = createCityMarkers(mapGeom);
+      renderChinaMap(mapCtx, {
+        width: mapFit.width,
+        height: mapFit.height,
+        mapGeom,
+        provinces: mapPolygons,
+        markers,
+        selectedProvince: appState.selectedProvince,
+        selectedCityLabel: appState.selectedCityLabel,
+        selectedLat: appState.lat,
+        selectedLng: appState.lng
+      });
+
+      updateTextPanels(viewState, obs);
+    }
+
+    function syncControlsFromState() {
+      controls.dateInput.value = formatDateInputValue(appState.date);
+      controls.monthSlider.value = String(appState.date.getMonth() + 1);
+      controls.hourSlider.value = String(appState.hour);
+      controls.modeSelect.value = appState.mode;
+      controls.speedSelect.value = String(appState.playbackSpeed);
+      controls.latInput.value = appState.lat.toFixed(2);
+      controls.lngInput.value = appState.lng.toFixed(2);
+      controls.showLabels.value = appState.showLabels ? "on" : "off";
+      controls.showConstellations.value = appState.showConstellations ? "on" : "off";
+      controls.monthReadout.textContent = monthName(appState.date.getMonth());
+      controls.hourReadout.textContent = formatHour(appState.hour);
+      controls.playBtn.textContent = appState.playing ? "Pause | 暂停" : "Play | 播放";
+      controls.playBtn.dataset.playing = String(appState.playing);
+      controls.locationLabel.textContent =
+        `${appState.selectedProvince} · ${appState.selectedCityLabel} | ${appState.lat.toFixed(2)}, ${appState.lng.toFixed(2)}`;
+      const sourceText = mapSource === "online" ? "地图源: 在线省界" : "地图源: 离线简化";
+      controls.mapHint.textContent = `${appState.mapHint} (${sourceText})`;
+      updateControlLocks();
+    }
+
+    function bindEvents() {
+      controls.dateInput.addEventListener("change", () => {
+        const parsed = parseDateInputValue(controls.dateInput.value);
+        if (!parsed) return;
+        appState.date = parsed;
+        syncControlsFromState();
+        renderAll();
+      });
+
+      controls.monthSlider.addEventListener("input", () => {
+        const month = Number(controls.monthSlider.value) - 1;
+        const d = new Date(appState.date);
+        d.setMonth(month);
+        appState.date = d;
+        syncControlsFromState();
+        renderAll();
+      });
+
+      controls.hourSlider.addEventListener("input", () => {
+        appState.hour = Number(controls.hourSlider.value);
+        syncControlsFromState();
+        renderAll();
+      });
+
+      controls.modeSelect.addEventListener("change", () => {
+        appState.mode = controls.modeSelect.value;
+        syncControlsFromState();
+        renderAll();
+      });
+
+      controls.speedSelect.addEventListener("change", () => {
+        appState.playbackSpeed = Number(controls.speedSelect.value);
+      });
+
+      controls.playBtn.addEventListener("click", () => {
+        appState.playing = !appState.playing;
+        syncControlsFromState();
+      });
+
+      controls.latInput.addEventListener("change", () => {
+        const lat = clamp(Number(controls.latInput.value), -89, 89);
+        setLocation(lat, appState.lng, {
+          source: "manual_input",
+          cityLabel: "手动输入"
+        });
+        appState.mapHint = "已通过纬度输入更新位置。";
+        renderAll();
+        syncControlsFromState();
+      });
+
+      controls.lngInput.addEventListener("change", () => {
+        const lng = clamp(Number(controls.lngInput.value), -180, 180);
+        setLocation(appState.lat, lng, {
+          source: "manual_input",
+          cityLabel: "手动输入"
+        });
+        appState.mapHint = "已通过经度输入更新位置。";
+        renderAll();
+        syncControlsFromState();
+      });
+
+      mapCanvas.addEventListener("click", (event) => {
+        const rect = mapCanvas.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const mapGeom = buildMapGeom(rect.width, rect.height);
+        const markers = createCityMarkers(mapGeom);
+        const nearCity = findNearestCityMarker(x, y, markers, 14);
+        if (nearCity) {
+          setLocation(nearCity.lat, nearCity.lng, {
+            source: "map_city",
+            cityLabel: nearCity.cityCn,
+            provinceName: nearCity.province
+          });
+          appState.mapHint = `已定位到 ${nearCity.cityCn}`;
+          syncControlsFromState();
+          renderAll();
+          return;
+        }
+
+        const loc = unprojectMapToLonLat(x, y, mapGeom);
+        const province = pointInProvince(loc.lon, loc.lat, mapPolygons);
+        if (!province) {
+          appState.mapHint = "请点击中国范围内区域，或直接点击城市点。";
+          syncControlsFromState();
+          renderAll();
+          return;
+        }
+
+        setLocation(loc.lat, loc.lon, {
+          source: "map_custom",
+          cityLabel: "自定义点",
+          provinceName: province.nameCn
+        });
+        appState.mapHint = `已在 ${province.nameCn} 选择自定义点`;
+        syncControlsFromState();
+        renderAll();
+      });
+
+      controls.showLabels.addEventListener("change", () => {
+        appState.showLabels = controls.showLabels.value === "on";
+        renderAll();
+      });
+
+      controls.showConstellations.addEventListener("change", () => {
+        appState.showConstellations = controls.showConstellations.value === "on";
+        renderAll();
+      });
+
+      window.addEventListener("resize", () => renderAll());
+
+      controls.quizForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = new FormData(controls.quizForm);
+        const answerSet = {
+          q1: data.get("q1"),
+          q2: data.get("q2")
+        };
+        const result = evaluateQuiz(answerSet, appState);
+        controls.quizResult.classList.remove("ok", "warn");
+        controls.quizResult.classList.add(result.ok ? "ok" : "warn");
+        controls.quizResult.innerHTML = result.message;
+      });
+    }
+
+    // Required function
+    function evaluateQuiz(answerSet, state) {
+      let score = 0;
+      if (answerSet.q1 === "revolution") score += 1;
+      if (answerSet.q2 === "little_change") score += 1;
+
+      if (!answerSet.q1 || !answerSet.q2) {
+        return {
+          ok: false,
+          score,
+          message: "请先完成两题再提交。Please answer both questions."
+        };
+      }
+
+      if (score === 2) {
+        return {
+          ok: true,
+          score,
+          message:
+            `得分 ${score}/2：很好。你正确区分了自转与公转作用。` +
+            ` In <strong>${state.mode}</strong> mode, keep checking how month and hour affect the sky differently.`
+        };
+      }
+
+      return {
+        ok: false,
+        score,
+        message:
+          `得分 ${score}/2：再观察一次“Rotation Only vs Combined”切换。` +
+          ` Key idea: monthly starfield shift at fixed local time is mainly from Earth's revolution.`
+      };
+    }
+
+    function animate(ts) {
+      if (!lastFrame) lastFrame = ts;
+      const deltaSec = (ts - lastFrame) / 1000;
+      lastFrame = ts;
+
+      if (appState.playing) {
+        appState.date = addDays(appState.date, appState.playbackSpeed * deltaSec);
+        syncControlsFromState();
+      }
+
+      renderAll(ts);
+      requestAnimationFrame(animate);
+    }
+
+    function init() {
+      const defaultCity = CITY_PRESETS.find((c) => c.isSchoolDefault) || CITY_PRESETS[0];
+      setLocation(defaultCity.lat, defaultCity.lng, {
+        source: "map_city",
+        cityLabel: defaultCity.cityCn,
+        provinceName: defaultCity.province
+      });
+      appState.mapHint = "点击省份区域或城市点，切换观测地点。正在尝试加载精细省界...";
+      syncControlsFromState();
+      bindEvents();
+      renderAll();
+      loadChinaProvinceMap();
+      requestAnimationFrame(animate);
+    }
+
+    init();
+  </script>
+</body>
+</html>

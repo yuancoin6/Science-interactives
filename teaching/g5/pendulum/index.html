@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摆的研究 · Pendulum Inquiry · 双语版</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&amp;family=Quicksand:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+/* ==================== 基础 ==================== */
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --pri:#f97316;--pri-l:#fff7ed;--pri-d:#ea580c;
+  --ok:#22c55e;--ok-l:#f0fdf4;
+  --warn:#eab308;--err:#ef4444;
+  --purple:#8b5cf6;--cyan:#06b6d4;
+  --bg:#fffbf0;--card:#fff;--ink:#2d1b00;--ink2:#78716c;
+  --sh:5px 5px 0 var(--ink);
+  --r:16px;--border:3px solid var(--ink);
+  --font:'Nunito','PingFang SC','Microsoft YaHei',sans-serif;
+  --font2:'Quicksand','PingFang SC',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;
+  background-image:radial-gradient(circle,rgba(249,115,22,.06) 2px,transparent 2px);background-size:48px 48px;}
+
+/* ==================== 进度条 ==================== */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--card);border-bottom:var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:4px;}
+.ps{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--ink2);transition:.3s;}
+.ps.on{color:var(--pri);}.ps.done{color:var(--ok);}
+.pd{width:28px;height:28px;border-radius:50%;background:#f5f5f4;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;transition:.3s;}
+.ps.on .pd{background:var(--pri);color:#fff;border-color:var(--ink);}
+.ps.done .pd{background:var(--ok);color:#fff;}
+.pl{width:20px;height:3px;background:#e7e5e4;border-radius:2px;}.pl.done{background:var(--ok);}
+
+/* ==================== 页面 ==================== */
+.page{display:none;min-height:100vh;padding:68px 20px 40px;max-width:880px;margin:0 auto;animation:fadeUp .5s ease;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ==================== 通用组件 ==================== */
+h1{font-size:clamp(22px,4vw,32px);line-height:1.4;margin-bottom:14px;font-weight:900;}
+h2{font-size:clamp(18px,3vw,24px);line-height:1.4;margin-bottom:10px;font-weight:900;}
+h3{font-size:clamp(15px,2.5vw,18px);margin-bottom:8px;font-weight:700;}
+p{line-height:1.8;margin-bottom:10px;font-size:clamp(14px,1.8vw,16px);}
+.sub{color:var(--ink2);font-size:clamp(13px,1.6vw,15px);line-height:1.7;}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 32px;border-radius:50px;font-size:clamp(14px,1.8vw,16px);font-weight:700;cursor:pointer;border:var(--border);transition:.2s;font-family:var(--font);box-shadow:3px 3px 0 var(--ink);}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink);}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
+.btn-p{background:var(--pri);color:#fff;}
+.btn-o{background:var(--card);color:var(--ink);}
+.btn-ok{background:var(--ok);color:#fff;}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:3px 3px 0 var(--ink);}
+
+.card{background:var(--card);border:var(--border);box-shadow:var(--sh);border-radius:var(--r);padding:clamp(16px,2vw,28px);margin-bottom:16px;position:relative;}
+.badge{position:absolute;top:-12px;right:-12px;width:40px;height:40px;border-radius:50%;background:var(--pri);border:var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.center{text-align:center;}
+.mt8{margin-top:8px;}.mt16{margin-top:16px;}.mt24{margin-top:24px;}.mt32{margin-top:32px;}
+
+/* ==================== 选项按钮 ==================== */
+.qopt{display:block;width:100%;text-align:left;padding:14px 20px;margin-bottom:10px;background:var(--card);border:var(--border);border-radius:var(--r);cursor:pointer;font-size:clamp(13px,1.6vw,15px);line-height:1.6;transition:.2s;font-family:var(--font);box-shadow:2px 2px 0 var(--ink);}
+.qopt:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink);}
+.qopt:disabled{cursor:default;opacity:.72;transform:none;box-shadow:2px 2px 0 var(--ink);}
+.qopt.sel{background:var(--pri-l);border-color:var(--pri);}
+.qopt.ok{background:#dcfce7;border-color:var(--ok);}
+.qopt.no{background:#fef2f2;border-color:var(--err);}
+.qopt.ms{padding-left:46px;position:relative;}
+.qopt.ms::before{content:'';position:absolute;left:16px;top:50%;transform:translateY(-50%);width:18px;height:18px;border:2px solid var(--ink2);border-radius:4px;}
+.qopt.ms.sel::before{background:var(--pri);border-color:var(--pri);}
+.qopt.ms.sel::after{content:'✓';position:absolute;left:19px;top:50%;transform:translateY(-50%);color:#fff;font-size:12px;font-weight:900;}
+.qfb{padding:14px 18px;border-radius:var(--r);margin-top:12px;font-size:13px;line-height:1.7;display:none;border:2px solid transparent;}
+.qfb.show{display:block;animation:fadeUp .3s ease;}
+.qfb.pos{background:#dcfce7;color:#166534;border-color:#22c55e;}
+.qfb.gd{background:#fefce8;color:#854d0e;border-color:#eab308;}
+
+/* ==================== 挑战卡 ==================== */
+.chcard{border:var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px;box-shadow:2px 2px 0 var(--ink);}
+.chcard-h{padding:14px 18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:space-between;background:#fafaf9;font-size:14px;transition:.2s;}
+.chcard-h:hover{background:#f5f5f4;}
+.chcard-b{max-height:0;overflow:hidden;transition:max-height .4s ease;padding:0 18px;}
+.chcard.open .chcard-b{max-height:600px;padding:16px 18px;}
+.chcard .arr{transition:transform .3s;font-size:12px;}.chcard.open .arr{transform:rotate(90deg);}
+
+/* ==================== 步骤指示 ==================== */
+.steps{display:flex;justify-content:center;gap:8px;margin-bottom:20px;}
+.sd{width:34px;height:34px;border-radius:50%;background:#f5f5f4;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;transition:.3s;}
+.sd.on{background:var(--pri);color:#fff;}.sd.done{background:var(--ok);color:#fff;}
+
+/* ==================== 因素卡 ==================== */
+.fcard{padding:16px 20px;border:var(--border);border-radius:var(--r);cursor:pointer;text-align:center;font-size:14px;font-weight:700;transition:.2s;margin-bottom:10px;box-shadow:2px 2px 0 var(--ink);}
+.fcard:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink);background:var(--pri-l);}
+.fcard.sel{background:var(--pri-l);border-color:var(--pri);}
+
+/* ==================== 拖拽 ==================== */
+.tagpool{display:flex;flex-wrap:wrap;gap:8px;padding:12px;min-height:50px;}
+.dtag{padding:8px 16px;border-radius:20px;background:#f5f5f4;border:2px solid var(--ink);cursor:grab;font-size:13px;font-weight:700;user-select:none;transition:.2s;box-shadow:2px 2px 0 var(--ink);}
+.dtag:active{cursor:grabbing;}.dtag.dragging{opacity:.4;}
+.dropz{border:3px dashed #d6d3d1;border-radius:var(--r);padding:14px;min-height:80px;margin-bottom:12px;transition:.2s;background:#fafaf9;}
+.dropz.over{border-color:var(--pri);background:var(--pri-l);}
+.dropz.ok{border-color:var(--ok);border-style:solid;background:var(--ok-l);}
+.dropz-l{font-size:14px;font-weight:700;margin-bottom:6px;}
+.dropz-h{font-size:12px;color:var(--ink2);}
+.dropz .dtag{background:var(--pri-l);border-color:var(--pri);}
+.dropz.ok .dtag{background:#dcfce7;border-color:var(--ok);}
+
+/* ==================== 模拟器 ==================== */
+.sim-wrap{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;}
+.sim-cv{flex:1;min-width:280px;}
+.sim-cv canvas{width:100%;border-radius:var(--r);background:#fafaf9;border:var(--border);box-shadow:var(--sh);cursor:pointer;}
+.sim-ctrl{flex:0 0 240px;min-width:220px;}
+.sld-grp{margin-bottom:16px;}
+.sld-grp label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;}
+.sld-grp label span{color:var(--pri);}
+.sld-grp input[type=range]{width:100%;height:8px;-webkit-appearance:none;appearance:none;background:#e7e5e4;border-radius:4px;outline:none;}
+.sld-grp input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:var(--pri);border-radius:50%;border:2px solid var(--ink);cursor:pointer;}
+.dual-cv{display:flex;gap:16px;flex-wrap:wrap;}
+.dual-cv>div{flex:1;min-width:200px;text-align:center;}
+.dual-cv canvas{width:100%;border-radius:var(--r);background:#fafaf9;border:var(--border);box-shadow:var(--sh);}
+.timer-big{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:6px;}
+
+/* ==================== 数据表 ==================== */
+table.dtbl{width:100%;border-collapse:separate;border-spacing:0;margin:12px 0;font-size:14px;border:var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--sh);}
+table.dtbl th,table.dtbl td{border:1px solid #e7e5e4;padding:10px 14px;text-align:center;}
+table.dtbl th{background:var(--pri);color:#fff;font-weight:700;border-color:var(--pri-d);}
+table.dtbl td input{width:72px;border:2px solid #e7e5e4;border-radius:8px;padding:6px;text-align:center;font-size:14px;font-family:var(--font);font-weight:700;}
+table.dtbl td input:focus{outline:none;border-color:var(--pri);}
+table.dtbl .avg{background:#dcfce7;font-weight:900;color:#166534;}
+
+/* ==================== 知识卡片面板 ==================== */
+.kc-btn{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--purple);color:#fff;border:var(--border);cursor:pointer;font-size:20px;box-shadow:var(--sh);z-index:99;display:none;align-items:center;justify-content:center;transition:.2s;}
+.kc-btn.show{display:flex;}
+.kc-btn:hover{transform:scale(1.08);}
+.kc-panel{position:fixed;right:0;top:0;bottom:0;width:min(380px,90vw);background:var(--bg);border-left:var(--border);z-index:201;transform:translateX(100%);transition:transform .3s ease;overflow-y:auto;padding:20px;}
+.kc-panel.open{transform:translateX(0);}
+.kc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;display:none;}
+.kc-overlay.show{display:block;}
+.kc-card{background:var(--card);border:var(--border);border-radius:var(--r);box-shadow:3px 3px 0 var(--ink);padding:16px;margin-bottom:14px;cursor:pointer;transition:.2s;}
+.kc-card:hover{transform:translate(-1px,-1px);}
+.kc-card h4{font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.kc-card p{font-size:13px;color:var(--ink2);margin:0;line-height:1.6;}
+.kc-card canvas{width:100%;height:100px;border-radius:8px;margin-top:8px;background:#fafaf9;}
+.kc-card.expanded p{color:var(--ink);}
+
+/* ==================== 微步骤 ==================== */
+.mstep{display:none;}.mstep.on{display:block;animation:fadeUp .5s ease;}
+
+/* ==================== 视频占位 ==================== */
+.video-placeholder{background:#1c1917;border:var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:40px 20px;text-align:center;color:#fff;margin:16px 0;}
+.video-placeholder .play-icon{font-size:48px;margin-bottom:12px;opacity:.8;}
+.video-placeholder p{color:#a8a29e;font-size:13px;margin:0;}
+
+/* ==================== 对比摆区 ==================== */
+.cmp-row{display:flex;justify-content:center;gap:24px;margin:16px 0;flex-wrap:wrap;}
+.cmp-item{text-align:center;flex:0 0 auto;}
+.cmp-item canvas{border-radius:12px;background:#fafaf9;border:2px solid #e7e5e4;}
+.cmp-label{font-size:13px;font-weight:700;margin-top:6px;}
+
+/* ==================== 填空 ==================== */
+.fblank{display:inline-block;min-width:70px;padding:4px 12px;border:none;border-bottom:3px solid var(--pri);font-size:15px;font-family:var(--font);font-weight:700;background:transparent;text-align:center;}
+.fblank:focus{outline:none;border-bottom-color:var(--pri-d);}
+.fsel{display:inline-block;padding:6px 12px;border:2px solid var(--pri);border-radius:8px;font-size:14px;font-family:var(--font);font-weight:700;background:var(--pri-l);cursor:pointer;}
+
+/* ==================== 结论卡 ==================== */
+.conclusion-card{background:linear-gradient(135deg,var(--pri-l),#fff);border:var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:24px;text-align:center;}
+.conclusion-card .big{font-size:clamp(18px,2.5vw,22px);font-weight:900;margin:12px 0;color:var(--pri);}
+
+/* ==================== 协作墙 ==================== */
+.pwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.pcard{background:var(--card);border:var(--border);border-radius:var(--r);box-shadow:3px 3px 0 var(--ink);padding:16px;border-left:6px solid var(--pri);}
+.pcard-tag{display:inline-block;padding:3px 12px;border-radius:20px;background:var(--pri-l);border:2px solid var(--pri);font-size:12px;font-weight:700;margin-bottom:8px;}
+.pcard p{font-size:13px;margin-bottom:4px;}
+
+/* ==================== 多因素研究 ==================== */
+.research-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:16px;}
+.research-item{background:var(--card);border:var(--border);border-radius:var(--r);box-shadow:3px 3px 0 var(--ink);padding:18px;}
+.research-item.done{background:var(--ok-l);border-color:var(--ok);}
+.research-item h4{font-size:15px;margin-bottom:6px;}
+.research-item p{font-size:13px;color:var(--ink2);margin:0;}
+.research-item .btn{width:100%;margin-top:12px;padding:10px 16px;font-size:13px;}
+.research-status{display:inline-block;padding:3px 10px;border-radius:20px;background:#f5f5f4;border:2px solid var(--ink);font-size:11px;font-weight:900;margin-bottom:8px;}
+.research-item.done .research-status{background:#dcfce7;border-color:var(--ok);color:#166534;}
+.action-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:24px;}
+
+/* ==================== 旅程 ==================== */
+.timeline{border-left:4px solid var(--pri);padding-left:20px;margin:16px 0;}
+.tl-i{position:relative;margin-bottom:18px;}
+.tl-i::before{content:'✓';position:absolute;left:-32px;top:2px;width:22px;height:22px;background:var(--ok);border:2px solid var(--ink);color:#fff;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:900;}
+.tl-i h4{font-size:14px;font-weight:700;margin-bottom:2px;}
+.tl-i p{font-size:12px;color:var(--ink2);margin:0;}
+
+/* ==================== 举手 & 模态 ==================== */
+.help-btn{position:fixed;bottom:20px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--warn);color:var(--ink);border:var(--border);cursor:pointer;font-size:22px;box-shadow:var(--sh);z-index:99;display:none;align-items:center;justify-content:center;}
+.help-btn.show{display:flex;}.help-btn:hover{transform:scale(1.08);}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:center;justify-content:center;}
+.modal.show{display:flex;}
+.modal-c{background:var(--card);border:var(--border);border-radius:var(--r);box-shadow:8px 8px 0 var(--ink);padding:24px;width:min(420px,90vw);animation:fadeUp .3s ease;max-height:85vh;overflow-y:auto;}
+.modal textarea{width:100%;height:80px;border:var(--border);border-radius:12px;padding:12px;font-size:14px;font-family:var(--font);resize:none;margin:12px 0;}
+.modal textarea:focus{outline:none;border-color:var(--pri);}
+
+/* ==================== 流动提示 ==================== */
+.flow{display:none;padding:12px 18px;border-radius:var(--r);border:2px dashed var(--ok);background:var(--ok-l);font-size:13px;margin-top:14px;cursor:pointer;font-weight:700;transition:.2s;}
+.flow:hover{background:#bbf7d0;}.flow.show{display:block;animation:fadeUp .5s ease;}
+
+/* 审稿方案 */
+.rev-plan{background:#fefce8;border:2px dashed var(--warn);padding:16px;border-radius:var(--r);font-size:13px;line-height:1.8;margin:12px 0;}
+
+/* 编辑器 */
+.editor{width:100%;min-height:180px;padding:16px;border:var(--border);border-radius:var(--r);font-size:14px;line-height:1.8;resize:vertical;font-family:var(--font);background:var(--card);box-shadow:inset 0 2px 4px rgba(0,0,0,.06);}
+.editor:focus{outline:none;border-color:var(--pri);}
+
+/* 故事框 */
+.story{background:#fefce8;border-left:5px solid var(--warn);border-radius:0 var(--r) var(--r) 0;padding:16px 20px;margin:14px 0;font-size:14px;line-height:1.8;}
+
+/* ==================== 响应式 ==================== */
+@media(max-width:600px){
+  .page{padding:60px 14px 32px;}
+  .ps span{display:none;}
+  .pwall{grid-template-columns:1fr;}
+  .sim-wrap{flex-direction:column;}
+  .sim-ctrl{flex:unset;min-width:unset;}
+  .dual-cv{flex-direction:column;}
+  .dual-cv>div{min-width:unset;}
+  .research-grid{grid-template-columns:1fr;}
+}
+</style>
+<style>
+.language-bar{position:fixed;inset:0 0 auto;z-index:110;background:#fff7ed;min-height:52px;padding:8px 16px;display:flex;align-items:center;justify-content:center;gap:12px;border-bottom:1px solid #d6d3d1;font-size:14px;}
+.language-bar select{font:inherit;max-width:65%;padding:6px;border:2px solid #9a3412;border-radius:8px;background:white;}
+.topbar{top:54px;min-height:48px;}
+.page{padding-top:126px;}
+.page p,.qopt,.fcard,.btn,.research-item{overflow-wrap:anywhere;}
+.btn{white-space:normal;text-align:center;}
+.fsel{max-width:100%;white-space:normal;}
+.chcard.open .chcard-b{max-height:none;}
+.sld-grp label{flex-wrap:wrap;gap:6px;}
+.sim-ctrl{flex:1 1 240px;}
+table.dtbl{table-layout:fixed;}
+table.dtbl th,table.dtbl td{padding:8px 5px;overflow-wrap:anywhere;}
+table.dtbl td input{width:100%;max-width:80px;min-width:0;}
+.kc-panel{padding-top:24px;}
+@media(max-width:600px){.page{padding-top:120px;}.sim-cv{min-width:0;width:100%;}.sim-ctrl{flex:auto;width:100%;}.action-row .btn{width:100%;}.language-bar{font-size:12px;gap:6px;}.topbar{gap:3px;}}
+</style>
+</head>
+<body>
+<div class="language-bar" data-no-translate>
+  <label for="languageChoice">语言 / Language</label>
+  <select id="languageChoice"><option value="bi">中英对照 / Bilingual</option><option value="zh">中文</option><option value="en">English</option></select>
+</div>
+
+<!-- ==================== 顶部进度条 ==================== -->
+<div class="topbar">
+  <div class="ps on" id="pg1"><div class="pd">1</div><span>热身</span></div><div class="pl" id="pl1"></div>
+  <div class="ps" id="pg2"><div class="pd">2</div><span>设计</span></div><div class="pl" id="pl2"></div>
+  <div class="ps" id="pg3"><div class="pd">3</div><span>实验</span></div><div class="pl" id="pl3"></div>
+  <div class="ps" id="pg4"><div class="pd">4</div><span>结论</span></div><div class="pl" id="pl4"></div>
+  <div class="ps" id="pg5"><div class="pd">5</div><span>交流</span></div>
+</div>
+
+<!-- ==================== 模块一：任务简报 ==================== -->
+<div class="page active" id="p-intro">
+  <div class="center">
+    <h1>一个摆，有时候摆得快，<br>有时候摆得慢——<br>到底是什么在控制它的快慢？</h1>
+    <p class="sub">今天你将亲自设计实验、收集数据、分析结果，找出影响摆的快慢的真正原因。</p>
+    <p style="font-size:13px;color:var(--ink2);">摆锤质量 · 完整摆动 · 公平实验</p>
+  </div>
+  <!-- 自由探索模拟器 -->
+  <div class="card mt24">
+    <h3>🎮 先来玩一玩：拖动滑块，观察摆的变化</h3>
+    <div class="sim-wrap mt8">
+      <div class="sim-cv"><canvas id="freeCV" width="380" height="380"></canvas></div>
+      <div class="sim-ctrl">
+        <div class="sld-grp"><label>摆绳长度 <span id="sv_len">40cm</span></label><input type="range" id="sr_len" min="15" max="80" value="40" oninput="updFree()"></div>
+        <div class="sld-grp"><label>摆锤重量 <span id="sv_wt">50g</span></label><input type="range" id="sr_wt" min="20" max="150" value="50" oninput="updFree()"></div>
+        <div class="sld-grp"><label>摆动幅度 <span id="sv_amp">20°</span></label><input type="range" id="sr_amp" min="5" max="45" value="20" oninput="updFree()"></div>
+        <p style="font-size:12px;color:var(--ink2);margin-top:8px;">💡 试试只改一个滑块，观察快慢变化。</p>
+        <div style="margin-top:8px;font-size:14px;">摆动：<span id="freeCnt" style="font-weight:900;color:var(--pri);font-size:20px;">0</span> 次</div>
+      </div>
+    </div>
+  </div>
+  <div class="center mt24">
+    <button class="btn btn-p" onclick="goQuiz()">我探索完了，出发！ →</button>
+  </div>
+  <p class="sub mt8 center" style="font-size:12px;opacity:.7;">不管你现在对摆了解多少，接下来的旅程都是为你量身准备的。</p>
+</div>
+
+<!-- ==================== 模块二：诊断 ==================== -->
+<div class="page" id="p-quiz"><div id="quizBox"></div></div>
+
+<!-- ==================== 模块三A：首席研究员 ==================== -->
+<div class="page" id="p-A">
+  <div class="card"><div class="badge">🔬</div>
+    <h2>首席研究员实验室</h2>
+    <p class="sub">你对摆的研究已经有很好的基础。现在先自由探索模拟器，然后设计一套完整的实验方案。</p>
+  </div>
+  <!-- 自由探索模拟器 -->
+  <div class="card mt16">
+    <h3>🎮 自由探索模拟器</h3>
+    <p class="sub">拖动滑块观察摆的变化，找到你想研究的问题。</p>
+    <div class="sim-wrap mt16">
+      <div class="sim-cv"><canvas id="freeCV_A" width="360" height="360"></canvas></div>
+      <div class="sim-ctrl">
+        <div class="sld-grp"><label>摆绳长度 <span id="svA_len">40cm</span></label><input type="range" id="srA_len" min="15" max="80" value="40" oninput="updFreeA()"></div>
+        <div class="sld-grp"><label>摆锤重量 <span id="svA_wt">50g</span></label><input type="range" id="srA_wt" min="20" max="150" value="50" oninput="updFreeA()"></div>
+        <div class="sld-grp"><label>摆动幅度 <span id="svA_amp">20°</span></label><input type="range" id="srA_amp" min="5" max="45" value="20" oninput="updFreeA()"></div>
+        <div style="font-size:13px;color:var(--ink2);margin-top:8px;">摆动：<span id="freeA_cnt" style="font-weight:900;color:var(--pri);">0</span> 次</div>
+      </div>
+    </div>
+  </div>
+  <!-- 提出问题 + 猜想 + 实验方案 -->
+  <div class="card mt16">
+    <h3>📝 我的实验方案</h3>
+    <p style="font-size:13px;color:var(--ink2);">包括：研究问题、猜想、实验步骤、需要记录的数据、如何保证公平性。</p>
+    <p style="font-weight:700;font-size:14px;margin-top:12px;">我想重点研究：
+      <select class="fsel" id="factorA" onchange="S.factor=this.value">
+        <option value="length">摆绳长度</option>
+        <option value="weight">摆锤重量</option>
+        <option value="angle">摆动幅度</option>
+      </select>
+    </p>
+    <textarea class="editor mt8" id="edA" placeholder="在这里写下你的实验方案...&#10;&#10;研究问题：&#10;我的猜想：&#10;实验步骤：&#10;需要记录的数据：&#10;如何保证公平性（控制变量）："></textarea>
+    <div class="center mt8"><button class="btn btn-o" onclick="showPage('p-B');S.path='B';" style="font-size:13px;">💡 帮我理思路（切换到引导模式）</button></div>
+  </div>
+  <div class="mt16">
+    <h3>🏆 高阶挑战卡</h3>
+    <div class="chcard" id="ch1"><div class="chcard-h" onclick="togCh('ch1')"><span>🧩 多因素挑战</span><span class="arr">▶</span></div><div class="chcard-b"><p style="font-size:13px;">设计一套方案，把绳长、重量、幅度三个因素都研究了。你需要几组实验？</p><textarea class="editor mt8" style="min-height:100px;" placeholder="写下你的多因素方案..."></textarea></div></div>
+    <div class="chcard" id="ch2"><div class="chcard-h" onclick="togCh('ch2')"><span>🔍 审稿人模式</span><span class="arr">▶</span></div><div class="chcard-b"><p style="font-size:13px;">找出下面方案的问题并写修改建议：</p><div class="rev-plan"><strong>小华的方案：</strong><br>研究摆绳长度的影响。两个摆，一个绳长20cm挂30g，另一个绳长50cm挂80g。各摆10次，看哪个快。</div><textarea class="editor mt8" style="min-height:100px;" placeholder="指出至少两个问题..."></textarea></div></div>
+  </div>
+  <div class="center mt24"><button class="btn btn-p" onclick="submitDesign()">方案完成，进入实验 →</button></div>
+</div>
+
+<!-- ==================== 模块三B：实验工作坊 ==================== -->
+<div class="page" id="p-B">
+  <div class="card"><div class="badge">🛠️</div>
+    <h2>实验构建工作坊</h2>
+    <p class="sub">一步一步搭建你的实验方案，每一步都有工具帮你。</p>
+  </div>
+  <div class="steps mt16"><div class="sd on" id="sB1">1</div><div class="sd" id="sB2">2</div><div class="sd" id="sB3">3</div><div class="sd" id="sB4">4</div></div>
+
+  <!-- B-1：选研究问题 -->
+  <div id="Bs1" class="card">
+    <h3>第一步：选择你想研究的问题</h3>
+    <div class="mt16">
+      <div class="fcard" data-factor="length" onclick="selFac(this,'length')">📏 研究<strong>摆绳长度</strong>是否影响摆的快慢</div>
+      <div class="fcard" data-factor="weight" onclick="selFac(this,'weight')">⚖️ 研究<strong>摆锤重量</strong>是否影响摆的快慢</div>
+      <div class="fcard" data-factor="angle" onclick="selFac(this,'angle')">📐 研究<strong>摆动幅度</strong>是否影响摆的快慢</div>
+    </div>
+    <p id="fConf" class="sub mt16" style="display:none;"></p>
+    <div class="center mt16"><button class="btn btn-p" id="btnBs2" style="display:none;" onclick="goBs(2)">下一步 →</button></div>
+  </div>
+  <!-- B-2：猜想 -->
+  <div id="Bs2" class="card" style="display:none;">
+    <h3>第二步：做出你的猜想</h3>
+    <div class="mt16" style="font-size:15px;line-height:2.4;" id="B_guessArea"></div>
+    <div class="center mt16"><button class="btn btn-p" id="btnBs3" onclick="goBs(3)">下一步 →</button></div>
+  </div>
+  <!-- B-3：变量分类拖拽 -->
+  <div id="Bs3" class="card" style="display:none;">
+    <h3>第三步：变量分类</h3>
+    <p class="sub">把下面的标签拖到正确的框里：</p>
+    <div class="tagpool mt16" id="tagPool"></div>
+    <div class="mt16">
+      <div class="dropz" id="dz-iv" ondrop="doDrop(event,'iv')" ondragover="doOver(event)" ondragleave="doLv(event)"><div class="dropz-l">🔄 要改变的条件（自变量）</div><div class="dropz-h">把要改变的条件拖到这里</div><div class="tagpool" id="dzTags-iv"></div></div>
+      <div class="dropz ok" id="dz-dv"><div class="dropz-l">📊 观察和测量的结果（因变量）</div><div class="tagpool"><div class="dtag" style="background:#dcfce7;border-color:var(--ok);cursor:default;">摆动15次所用时间</div></div></div>
+      <div class="dropz" id="dz-cv" ondrop="doDrop(event,'cv')" ondragover="doOver(event)" ondragleave="doLv(event)"><div class="dropz-l">🔒 保持不变的条件（控制变量）</div><div class="dropz-h">把其他条件拖到这里</div><div class="tagpool" id="dzTags-cv"></div></div>
+    </div>
+    <div id="dragFb" class="qfb"></div>
+    <div class="center mt16"><button class="btn btn-p" id="btnBs4" style="display:none;" onclick="goBs(4)">下一步 →</button></div>
+  </div>
+  <!-- B-4：生成方案 -->
+  <div id="Bs4" class="card" style="display:none;">
+    <h3>第四步：完成实验方案</h3>
+    <div id="B_planForm" class="mt16" style="line-height:2.4;font-size:14px;"></div>
+    <div class="center mt24"><button class="btn btn-p" onclick="submitDesign()">方案完成，进入实验 →</button></div>
+    <div class="flow show mt16" onclick="S.path='A';showPage('p-A');initFreeA();">🚀 挑战升级：试试自由设计另一个因素的实验？</div>
+  </div>
+</div>
+
+<!-- ==================== 模块三C：探究起步站 ==================== -->
+<div class="page" id="p-C">
+  <div class="card"><div class="badge">🚀</div>
+    <h2>探究起步站</h2>
+    <p class="sub">先来认识摆，然后一步步搞清楚怎么研究它。<br>别担心，每一步都很小，你一定可以的。</p>
+  </div>
+  <div class="steps mt16"><div class="sd on" id="sC1">1</div><div class="sd" id="sC2">2</div><div class="sd" id="sC3">3</div><div class="sd" id="sC4">4</div><div class="sd" id="sC5">5</div></div>
+
+  <!-- C-1：认识摆 -->
+  <div class="mstep on" id="mc1">
+    <div class="card">
+      <h3>🔵 认识摆</h3>
+      <canvas id="mc1CV" width="300" height="260" style="display:block;margin:12px auto;border-radius:12px;background:#fafaf9;border:2px solid #e7e5e4;"></canvas>
+      <p>这是一个<strong>摆</strong>。由<strong>摆绳</strong>和<strong>摆锤</strong>组成。<br>摆从一边摆到另一边再摆回来 = <strong>摆动一次</strong>。</p>
+      <p style="font-weight:700;margin-top:12px;">摆的组成部分包括？</p>
+      <button type="button" class="qopt" data-correct="false">支架和绳子</button>
+      <button type="button" class="qopt" data-correct="true">摆绳和摆锤</button>
+      <button type="button" class="qopt" data-correct="false">秒表和支架</button>
+      <div id="mc1fb" class="qfb"></div>
+    </div>
+  </div>
+
+  <!-- C-2：什么影响快慢（三组对比） -->
+  <div class="mstep" id="mc2">
+    <div class="card">
+      <h3>🔵 什么可能影响摆的快慢？</h3>
+      <p class="sub">观察每组对比，两个摆同时摆动：</p>
+      <!-- 对比1：绳长 -->
+      <div id="cmpGroup1" class="mt16">
+        <p style="font-weight:700;">第一组：绳子长短不同</p>
+        <div class="cmp-row">
+          <div class="cmp-item"><canvas id="cmp1a" width="100" height="140"></canvas><div class="cmp-label">短绳 20cm</div></div>
+          <div class="cmp-item"><canvas id="cmp1b" width="100" height="140"></canvas><div class="cmp-label">中绳 40cm</div></div>
+          <div class="cmp-item"><canvas id="cmp1c" width="100" height="180"></canvas><div class="cmp-label">长绳 60cm</div></div>
+        </div>
+        <div class="center"><button class="qopt" style="max-width:340px;margin:0 auto 6px;" data-cmp="1" onclick="cmpAns(this,'ok')">短绳的摆最快</button><button class="qopt" style="max-width:340px;margin:0 auto 6px;" data-cmp="1" onclick="cmpAns(this,'no')">它们一样快</button></div>
+        <div id="cmpFb1" class="qfb"></div>
+      </div>
+      <!-- 对比2：重量 -->
+      <div id="cmpGroup2" class="mt24" style="display:none;">
+        <p style="font-weight:700;">第二组：摆锤轻重不同</p>
+        <div class="cmp-row">
+          <div class="cmp-item"><canvas id="cmp2a" width="100" height="140"></canvas><div class="cmp-label">轻 30g</div></div>
+          <div class="cmp-item"><canvas id="cmp2b" width="100" height="140"></canvas><div class="cmp-label">重 100g</div></div>
+        </div>
+        <div class="center"><button class="qopt" style="max-width:340px;margin:0 auto 6px;" data-cmp="2" onclick="cmpAns(this,'no')">重的更快</button><button class="qopt" style="max-width:340px;margin:0 auto 6px;" data-cmp="2" onclick="cmpAns(this,'ok')">一样快</button></div>
+        <div id="cmpFb2" class="qfb"></div>
+      </div>
+      <!-- 对比3：幅度 -->
+      <div id="cmpGroup3" class="mt24" style="display:none;">
+        <p style="font-weight:700;">第三组：摆动幅度不同</p>
+        <div class="cmp-row">
+          <div class="cmp-item"><canvas id="cmp3a" width="100" height="140"></canvas><div class="cmp-label">小幅 10°</div></div>
+          <div class="cmp-item"><canvas id="cmp3b" width="100" height="140"></canvas><div class="cmp-label">大幅 35°</div></div>
+        </div>
+        <div class="center"><button class="qopt" style="max-width:340px;margin:0 auto 6px;" data-cmp="3" onclick="cmpAns(this,'no')">大幅更快</button><button class="qopt" style="max-width:340px;margin:0 auto 6px;" data-cmp="3" onclick="cmpAns(this,'ok')">一样快</button></div>
+        <div id="cmpFb3" class="qfb"></div>
+      </div>
+      <div id="cmpSummary" class="card mt24" style="display:none;background:var(--pri-l);">
+        <p><strong>总结：</strong>绳长、重量、幅度都可能影响快慢。到底哪个是真正原因？我们需要做实验验证！</p>
+        <div class="center mt8"><button class="btn btn-p" onclick="goMc(3)">继续 →</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C-3：理解控制变量 -->
+  <div class="mstep" id="mc3">
+    <div class="card">
+      <h3>🔵 为什么只能改变一个条件？</h3>
+      <div class="video-placeholder">
+        <div class="play-icon">▶</div>
+        <p>📹 视频：控制变量法——只改一个条件的实验（45秒）</p>
+      </div>
+      <div class="story">
+        <strong>小明的实验：</strong><br>
+        第一个摆：绳长<strong>30cm</strong>、<strong>50g</strong>摆锤<br>
+        第二个摆：绳长<strong>60cm</strong>、<strong>100g</strong>摆锤<br><br>
+        结果第一个更快。小明说：<em>"绳子短，摆就快。"</em>
+      </div>
+      <p style="font-weight:700;">小明的结论靠谱吗？</p>
+      <button class="qopt" id="mc3w" onclick="chkMc3(false)">靠谱，绳子短确实摆得快</button>
+      <button class="qopt" id="mc3r" onclick="chkMc3(true)">不太靠谱，两个摆不止绳长不同</button>
+      <div id="mc3fb" class="qfb"></div>
+      <div id="mc3ex" style="display:none;" class="mt16">
+        <div class="card" style="background:var(--ok-l);border-color:var(--ok);">
+          <p><strong>你发现了！</strong>小明的两个摆绳长和重量都不同。做实验时<strong>每次只能改变一个条件</strong>，其他保持一样。这叫<strong>控制变量</strong>。</p>
+          <p style="margin-top:8px;">这是科学家最重要的思维方式之一！</p>
+        </div>
+        <div class="center mt16"><button class="btn btn-p" onclick="goMc(4)">我明白了 →</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C-4：提出问题与猜想 -->
+  <div class="mstep" id="mc4">
+    <div class="card">
+      <h3>🔵 提出问题与猜想</h3>
+      <div class="card" style="background:var(--pri-l);border-color:var(--pri);">
+        <p style="font-size:16px;font-weight:900;text-align:center;">我们来研究：<br>摆绳长度是否影响摆的快慢？</p>
+      </div>
+      <p style="font-weight:700;" class="mt16">你的猜想：短绳的摆会更快还是更慢？</p>
+      <div class="cmp-row">
+        <div class="cmp-item"><canvas id="guessCV1" width="90" height="120"></canvas><div class="cmp-label">短绳 30cm</div></div>
+        <div class="cmp-item"><canvas id="guessCV2" width="90" height="160"></canvas><div class="cmp-label">长绳 60cm</div></div>
+      </div>
+      <button class="qopt" onclick="cGuess(this,'fast')">🏃 我猜短绳的摆更快</button>
+      <button class="qopt" onclick="cGuess(this,'slow')">🐢 我猜短绳的摆更慢</button>
+      <button class="qopt" onclick="cGuess(this,'same')">🤔 我猜它们一样快</button>
+      <div id="mc4fb" class="qfb"></div>
+    </div>
+  </div>
+
+  <!-- C-5：引导填空设计实验 -->
+  <div class="mstep" id="mc5">
+    <div class="card">
+      <h3>🧪 你来当小科学家</h3>
+      <p class="sub">研究<strong>摆绳长度</strong>是否影响摆的快慢，完成实验计划：</p>
+      <div class="mt16" style="line-height:2.6;font-size:14px;">
+        <p>1. 要改变的条件是：
+          <select class="fsel" id="cf1" onchange="chkCf()"><option value="">请选择</option><option value="length">摆绳长度</option><option value="weight">摆锤重量</option><option value="angle">摆动幅度</option></select>
+          <span id="cf1f" style="font-size:12px;cursor:pointer;" onclick="openKC(4)"></span>
+        </p>
+        <p>2. 第一个摆绳长30cm，第二个绳长
+          <input type="number" class="fblank" id="cf2" style="width:60px;" placeholder="?" onchange="chkCf()"> cm
+          <span id="cf2f" style="font-size:12px;"></span>
+        </p>
+        <p>3. 摆锤重量都应该：
+          <select class="fsel" id="cf3" onchange="chkCf()"><option value="">请选择</option><option value="same">都是50克</option><option value="diff">一个50一个100</option></select>
+          <span id="cf3f" style="font-size:12px;cursor:pointer;" onclick="openKC(4)"></span>
+        </p>
+        <p>4. 摆动幅度应该：
+          <select class="fsel" id="cf4" onchange="chkCf()"><option value="">请选择</option><option value="same">保持一样</option><option value="diff">可以不同</option></select>
+          <span id="cf4f" style="font-size:12px;"></span>
+        </p>
+        <p>5. 重复实验 <input type="number" class="fblank" id="cf5" style="width:50px;" value="3" min="1" max="10"> 次取平均值</p>
+      </div>
+      <div id="mc5res" class="card mt16" style="display:none;background:var(--ok-l);border-color:var(--ok);"></div>
+      <div class="center mt16"><button class="btn btn-p" id="btnCsub" style="display:none;" onclick="submitDesign()">方案完成，进入实验 →</button></div>
+      <div class="flow mt16" id="c-upflow" onclick="S.path='B';showPage('p-B');">🚀 你已掌握基本方法！要不要试试拖拽工具设计另一个因素？</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 模块四：模拟实验室 ==================== -->
+<div class="page" id="p-sim">
+  <div class="card"><div class="badge">🧪</div>
+    <h2>模拟实验室</h2>
+    <p class="sub">根据你的实验方案，进行对比实验并记录数据。</p>
+  </div>
+  <!-- 正式对比实验 -->
+  <div class="card mt16">
+    <h3>📋 正式实验：对比记录</h3>
+    <p class="sub" id="simDesc"></p>
+    <div class="dual-cv mt16">
+      <div><canvas id="expCV1" width="220" height="280"></canvas><div style="font-weight:700;font-size:13px;margin-top:6px;" id="expL1">组1</div><div class="timer-big">⏱ <span id="expT1">0.00</span>s</div><div style="font-size:13px;">摆动 <span id="expS1" style="font-weight:900;color:var(--pri);">0</span>/15 次</div></div>
+      <div><canvas id="expCV2" width="220" height="280"></canvas><div style="font-weight:700;font-size:13px;margin-top:6px;" id="expL2">组2</div><div class="timer-big">⏱ <span id="expT2">0.00</span>s</div><div style="font-size:13px;">摆动 <span id="expS2" style="font-weight:900;color:var(--pri);">0</span>/15 次</div></div>
+    </div>
+    <div class="center mt16">
+      <button class="btn btn-p" id="btnRun" onclick="runExp()">▶ 开始实验</button>
+      <button class="btn btn-ok" id="btnRec" style="display:none;margin-left:8px;" onclick="recTrial()">📝 记录数据</button>
+    </div>
+  </div>
+  <!-- 数据记录表 -->
+  <div class="card mt16">
+    <h3>📊 实验数据记录表</h3>
+    <p class="sub" id="tblGuide"></p>
+    <table class="dtbl mt8" id="dataTbl">
+      <thead><tr><th></th><th id="th1">组1</th><th id="th2">组2</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:700;">第1次</td><td><input id="d1a" readonly placeholder="-"></td><td><input id="d1b" readonly placeholder="-"></td></tr>
+        <tr><td style="font-weight:700;">第2次</td><td><input id="d2a" readonly placeholder="-"></td><td><input id="d2b" readonly placeholder="-"></td></tr>
+        <tr><td style="font-weight:700;">第3次</td><td><input id="d3a" readonly placeholder="-"></td><td><input id="d3b" readonly placeholder="-"></td></tr>
+        <tr><td style="font-weight:900;">平均值</td><td class="avg" id="avg1">-</td><td class="avg" id="avg2">-</td></tr>
+      </tbody>
+    </table>
+    <div id="tblFeedback" class="qfb pos" style="display:none;"></div>
+    <div class="center mt16"><button class="btn btn-p" id="btnAnlz" style="display:none;" onclick="goAnalyze()">数据收集完成 → 分析结果</button></div>
+  </div>
+</div>
+
+<!-- ==================== 模块五：分析与结论 ==================== -->
+<div class="page" id="p-anlz">
+  <div class="card"><div class="badge">📈</div>
+    <h2>数据分析与结论</h2>
+  </div>
+  <div class="card mt16">
+    <h3>观察数据</h3>
+    <div id="dataReview" class="mt8" style="font-size:15px;line-height:2;"></div>
+  </div>
+  <div class="card mt16">
+    <h3>得出结论（填空）</h3>
+    <div class="mt8" style="font-size:14px;line-height:2.6;">
+      <p>通过实验，我发现：</p>
+      <p>1. 我改变的条件是：<select class="fsel" id="an1"><option value="">请选择</option><option value="length">摆绳长度</option><option value="weight">摆锤重量</option><option value="angle">摆动幅度</option></select></p>
+      <p>2. 实验结果是：<select class="fsel" id="an2"><option value="">请选择</option><option value="diff">两组数据差异明显</option><option value="same">两组数据几乎一样</option></select></p>
+      <p>3. 所以我的结论是：<select class="fsel" id="an3"><option value="">请选择</option><option value="yes">这个因素影响摆的快慢</option><option value="no">这个因素不影响摆的快慢</option></select></p>
+      <p>4. 用一句话说说你的发现：<br><input type="text" class="fblank" id="an4" style="width:100%;min-width:200px;text-align:left;padding:8px 12px;" placeholder="例如：摆绳越长，摆得越慢..."></p>
+    </div>
+    <div class="center mt16"><button class="btn btn-p" onclick="genConclusion()">生成结论卡 →</button></div>
+  </div>
+  <div class="card mt16">
+    <h3>🔍 误差分析</h3>
+    <p class="sub">真实实验中数据可能不完全精确，想想可能的误差来源：</p>
+    <div class="mt8">
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--pri);width:18px;height:18px;"> 计时不够精确（按秒表的反应时间）</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--pri);width:18px;height:18px;"> 释放摆锤时角度不一致</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--pri);width:18px;height:18px;"> 数摆动次数时数错</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--pri);width:18px;height:18px;"> 空气阻力的影响</label>
+    </div>
+    <p style="font-weight:700;font-size:14px;margin-top:12px;">✅ 做多次实验取平均值，就是为了减小误差，让结果更可靠。</p>
+  </div>
+  <div id="conclusionCard" class="conclusion-card mt16" style="display:none;"></div>
+  <div id="nextStudyActions" style="display:none;">
+    <div class="card mt16" style="background:var(--pri-l);border-color:var(--pri);text-align:center;">
+      <h3>本轮研究已保存</h3>
+      <p class="sub" id="researchProgressText"></p>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-p" id="btnContinueResearch" onclick="openNextResearch()">🧪 继续研究另一个因素</button>
+      <button class="btn btn-o" onclick="goCollab()">查看研究汇总 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 模块五B：继续研究 ==================== -->
+<div class="page" id="p-next-research">
+  <div class="card"><div class="badge">🧪</div>
+    <h2>继续研究另一个因素</h2>
+    <p class="sub">你的诊断和学习路径会保留。选择一个还没研究的因素，直接开始新一轮实验设计。</p>
+  </div>
+  <div class="research-grid" id="nextResearchGrid"></div>
+  <div class="action-row">
+    <button class="btn btn-o" onclick="goCollab()">暂时结束，查看研究汇总 →</button>
+  </div>
+</div>
+
+<!-- ==================== 模块六：协作 ==================== -->
+<div class="page" id="p-collab">
+  <div class="card"><div class="badge">📋</div><h2>摆的研究发布会</h2><p class="sub">你的多项实验成果和示例成果都在这里。</p></div>
+  <div class="card mt24">
+    <h3>⭐ 我的研究汇总</h3>
+    <div class="research-grid" id="myResearchSummary"></div>
+    <div class="center mt16" id="collabContinueWrap" style="display:none;">
+      <button class="btn btn-p" onclick="openNextResearch()">继续完成未研究的因素</button>
+    </div>
+  </div>
+  <div class="pwall mt24" id="planWall"></div>
+  <div class="card mt24">
+    <h3>📊 全班数据总览</h3>
+    <div style="display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:100px;text-align:center;padding:16px;background:var(--pri-l);border:var(--border);border-radius:var(--r);">
+        <div style="font-size:28px;font-weight:900;color:var(--pri);" id="stLen">0</div>
+        <div style="font-size:12px;font-weight:700;">研究绳长</div>
+      </div>
+      <div style="flex:1;min-width:100px;text-align:center;padding:16px;background:var(--ok-l);border:var(--border);border-radius:var(--r);">
+        <div style="font-size:28px;font-weight:900;color:var(--ok);" id="stWt">0</div>
+        <div style="font-size:12px;font-weight:700;">研究重量</div>
+      </div>
+      <div style="flex:1;min-width:100px;text-align:center;padding:16px;background:#fefce8;border:var(--border);border-radius:var(--r);">
+        <div style="font-size:28px;font-weight:900;color:var(--warn);" id="stAng">0</div>
+        <div style="font-size:12px;font-weight:700;">研究幅度</div>
+      </div>
+    </div>
+    <div class="card mt16" style="background:var(--pri-l);border-color:var(--pri);">
+      <h3>🔬 综合结论</h3>
+      <div id="combinedConclusion" style="font-size:15px;line-height:1.8;"></div>
+    </div>
+  </div>
+  <div class="center mt24"><button class="btn btn-p" onclick="goReview()">进入复盘 →</button></div>
+</div>
+
+<!-- ==================== 模块七：复盘 ==================== -->
+<div class="page" id="p-review">
+  <div class="card"><div class="badge">🌟</div><h2>探究复盘站</h2></div>
+  <div class="card mt16">
+    <h3>你的完整探究旅程</h3>
+    <div class="timeline mt16" id="timeline"></div>
+  </div>
+  <div class="card mt16">
+    <h3>反思</h3>
+    <p style="font-weight:700;font-size:14px;">这次探究中最难的是？</p>
+    <button class="qopt" onclick="selRef(this)">想出要研究什么</button>
+    <button class="qopt" onclick="selRef(this)">区分自变量和控制变量</button>
+    <button class="qopt" onclick="selRef(this)">搞清楚哪些条件要保持不变</button>
+    <button class="qopt" onclick="selRef(this)">从数据中得出结论</button>
+    <p style="font-weight:700;font-size:14px;margin-top:16px;">如果再做一次，你会怎样改进？</p>
+    <textarea class="editor" style="min-height:80px;" placeholder="写下你的想法..."></textarea>
+  </div>
+  <div class="card mt16" style="background:var(--pri-l);border-color:var(--pri);text-align:center;">
+    <p style="font-size:16px;font-weight:700;">🎉 你完成了一次完整的科学探究！</p>
+    <p>提出问题 → 做出猜想 → 设计实验 → 收集数据 → 分析结果 → 得出结论</p>
+    <p style="font-weight:900;color:var(--pri);font-size:18px;margin-top:8px;">这就是科学家的工作方式。</p>
+  </div>
+</div>
+
+<!-- ==================== 知识卡片面板 ==================== -->
+<button class="kc-btn" id="kcBtn" onclick="toggleKC()">📚</button>
+<div class="kc-overlay" id="kcOverlay" onclick="toggleKC()"></div>
+<div class="kc-panel" id="kcPanel">
+  <h3 style="margin-bottom:16px;">📚 知识卡片</h3>
+  <div class="kc-card" onclick="this.classList.toggle('expanded')">
+    <h4>🔵 什么是摆？</h4>
+    <p>一根不会伸长的细线，一端固定，一端挂重物。拉到一边放开，它就会来回摆动。这就是一个摆！</p>
+    <canvas id="kcCV1" width="200" height="100"></canvas>
+  </div>
+  <div class="kc-card" onclick="this.classList.toggle('expanded')">
+    <h4>🔵 摆长是什么？</h4>
+    <p>从固定点（支点）到摆锤中心的距离。注意：不只是绳子的长度，而是从挂点到重物中心的距离。</p>
+  </div>
+  <div class="kc-card" onclick="this.classList.toggle('expanded')">
+    <h4>🔵 怎么数摆动次数？</h4>
+    <p>摆从一边摆到另一边再摆回来 = 摆动1次。口诀：去→回 = 1次。</p>
+  </div>
+  <div class="kc-card" onclick="this.classList.toggle('expanded')">
+    <h4>🔵 怎么计时？</h4>
+    <p>喊"开始"的同时按下秒表，数够15次摆动时按停。时间越长说明摆得越慢。</p>
+  </div>
+  <div class="kc-card" onclick="this.classList.toggle('expanded')">
+    <h4>🔵 什么是控制变量？</h4>
+    <p>做实验时每次只改变一个条件，其他条件都保持一样。这样才能知道结果到底是谁造成的。</p>
+  </div>
+  <div class="kc-card" onclick="this.classList.toggle('expanded')">
+    <h4>🔵 什么是对比实验？</h4>
+    <p>做两组实验来比较。一组改变了条件，一组没改变，通过对比看出差异。</p>
+  </div>
+</div>
+
+<!-- ==================== 举手 ==================== -->
+<button class="help-btn" id="helpBtn" onclick="$('helpModal').classList.add('show')">🙋</button>
+<div class="modal" id="helpModal">
+  <div class="modal-c">
+    <h3>🙋 举手问老师</h3>
+    <textarea id="helpTxt" placeholder="我不太理解..."></textarea>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-o" onclick="$('helpModal').classList.remove('show')" style="flex:1;">取消</button>
+      <button class="btn btn-p" onclick="submitHelp()" style="flex:1;">发送</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== 工具 ====================
+const $=id=>document.getElementById(id);
+const PI=Math.PI, G=980; // cm/s²
+const now=()=>new Date().toLocaleTimeString();
+const FACTORS={
+  length:{name:'摆绳长度',icon:'📏',short:'绳长',expected:'有明显影响'},
+  weight:{name:'摆锤重量',icon:'⚖️',short:'重量',expected:'影响不明显'},
+  angle:{name:'摆动幅度',icon:'📐',short:'幅度',expected:'在本实验范围内影响不明显'}
+};
+
+// ==================== 状态 ====================
+const S={path:null,factor:'length',scores:[0,0,0,0],steps:[],trialNum:0,data:[[],[]],avg1:0,avg2:0,experiments:{},startTime:Date.now()};
+
+// ==================== 页面 ====================
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');window.scrollTo(0,0);}
+function setProg(n){for(let i=1;i<=5;i++){const s=$('pg'+i),l=$('pl'+(i-1));s.classList.remove('on','done');if(l)l.classList.remove('done');if(i<n){s.classList.add('done');if(l)l.classList.add('done');}else if(i===n)s.classList.add('on');}}
+
+// ==================== Canvas摆引擎 ====================
+class Pend{
+  constructor(cv,o={}){
+    this.cv=cv;this.ctx=cv.getContext('2d');this.W=cv.width;this.H=cv.height;
+    this.len=o.len||40;this.mass=o.mass||50;this.amp=o.amp||20;
+    this.px=this.W/2;this.py=o.py||36;
+    this.running=true;this.t0=performance.now();
+    this.swings=0;this.lastSgn=1;this.onSwing=o.onSwing||null;
+    this.labels=o.labels||false;this.scale=o.scale||2.2;
+    this._raf=null;this._draw=this._draw.bind(this);this._draw();
+  }
+  get T(){return 2*PI*Math.sqrt(this.len/G);}
+  theta(t){return this.amp*PI/180*Math.cos(2*PI*t/this.T);}
+  bobR(){return Math.max(8,5+this.mass/14);}
+  _draw(ts){
+    const t=((ts||0)-this.t0)/1000;
+    const th=this.running?this.theta(t):this.theta(0);
+    if(this.running){const sg=Math.sin(2*PI*t/this.T)>0?1:-1;if(sg!==this.lastSgn&&sg===1){this.swings++;if(this.onSwing)this.onSwing(this.swings);}this.lastSgn=sg;}
+    const c=this.ctx,W=this.W,H=this.H;
+    const L=this.len*this.scale,bx=this.px+L*Math.sin(th),by=this.py+L*Math.cos(th),r=this.bobR();
+    c.clearRect(0,0,W,H);
+    // bar
+    c.fillStyle='#78716c';c.beginPath();c.roundRect(this.px-28,this.py-8,56,8,3);c.fill();
+    // rope
+    c.beginPath();c.moveTo(this.px,this.py);c.lineTo(bx,by);c.strokeStyle='#44403c';c.lineWidth=2;c.stroke();
+    // pivot
+    c.beginPath();c.arc(this.px,this.py,4,0,2*PI);c.fillStyle='#44403c';c.fill();
+    // bob
+    c.beginPath();c.arc(bx,by,r,0,2*PI);
+    const g=c.createRadialGradient(bx-r/3,by-r/3,r/4,bx,by,r);g.addColorStop(0,'#fb923c');g.addColorStop(1,'#ea580c');
+    c.fillStyle=g;c.fill();c.strokeStyle='#9a3412';c.lineWidth=2;c.stroke();
+    // labels
+    if(this.labels){c.font='bold 12px Nunito,sans-serif';c.fillStyle='#f97316';
+      const label=(zh,en)=>typeof pendulumLanguage==='undefined'||pendulumLanguage==='zh'?zh:pendulumLanguage==='en'?en:zh+' / '+en;
+      c.font='bold 10px sans-serif';
+      const write=(text,x,y)=>c.fillText(text,Math.max(4,Math.min(x,W-c.measureText(text).width-4)),y);
+      write(label('支点','Pivot'),this.px+10,this.py-10);
+      const mx=(this.px+bx)/2,my=(this.py+by)/2;write(label('摆绳','String')+' '+this.len+'cm',mx+8,my);
+      write(label('摆锤','Bob')+' '+this.mass+'g',bx+r+6,by+4);
+    }
+    this._raf=requestAnimationFrame(this._draw);
+  }
+  update(o){Object.assign(this,o);this.t0=performance.now();this.swings=0;this.lastSgn=1;}
+  stop(){this.running=false;}
+  start(){this.running=true;this.t0=performance.now();this.swings=0;this.lastSgn=1;}
+  destroy(){if(this._raf)cancelAnimationFrame(this._raf);}
+}
+
+// ==================== 首页摆 ====================
+window.addEventListener('load',()=>{initFreeSim();bindMc1Choices();});
+
+// ==================== 诊断 ====================
+const QD=[
+  {q:'下面哪些因素可能影响摆的快慢？<span style="font-size:12px;color:#999;">（可多选）</span>',multi:true,opts:['摆绳的长度','摆锤的重量','摆动的幅度','支架的颜色','实验者的心情'],ans:[0,1,2]},
+  {q:'小红准备两个摆：绳长30cm挂50g，另一个绳长60cm挂100g。记录摆动15次的时间。<br><br><strong>她的实验设计有问题吗？</strong>',opts:['没问题','有问题，同时改变了两个条件','应该多摆几次','不确定'],ans:1},
+  {q:'如果你来帮小红改进，你会怎么做？',opts:['都用50g摆锤，只改绳长','都用30cm绳，只改重量','同时改变再观察','再想想'],ans:0},
+  {q:'接下来你要自己设计实验，你现在的感觉是？',opts:['🚀 想好了，快开始','🤔 大概有方向，需要帮助','😰 不太清楚，希望一步步来'],self:true}
+];
+let curQ=0,mSel=[];
+function goQuiz(){S.steps.push({n:'开始探究',t:now()});showPage('p-quiz');renderQ(0);}
+function renderQ(i){curQ=i;mSel=[];const q=QD[i],b=$('quizBox');
+  let h=`<div style="font-size:13px;color:var(--ink2);margin-bottom:16px;font-weight:700;">问题 ${i+1} / ${QD.length}</div><div class="card"><h3>${q.q}</h3><div class="mt16">`;
+  q.opts.forEach((o,j)=>{const c=q.multi?'qopt ms':'qopt';const fn=q.multi?`togM(this,${j})`:q.self?`selSelf(${j})`:`selQ(this,${j})`;
+    h+=`<button class="${c}" data-i="${j}" onclick="${fn}">${o}</button>`;});
+  h+=`</div><div id="qfb" class="qfb"></div>`;
+  if(q.multi)h+=`<div class="center mt16"><button class="btn btn-p" id="mSub" onclick="subM()" disabled>确认</button></div>`;
+  h+=`</div>`;b.innerHTML=h;}
+function togM(el,i){el.classList.toggle('sel');mSel.includes(i)?mSel=mSel.filter(x=>x!==i):mSel.push(i);$('mSub').disabled=!mSel.length;}
+function subM(){const rc=mSel.filter(i=>i<=2).length;const ha=mSel.includes(3)||mSel.includes(4);S.scores[0]=(!ha&&rc>=2)?2:(rc>0?1:0);
+  // 仅锁定当前前测题，不能清除隐藏学习页面的点击事件。
+  document.querySelectorAll('#quizBox .qopt').forEach(b=>{const j=+b.dataset.i;if(QD[0].ans.includes(j))b.classList.add('ok');else if(mSel.includes(j))b.classList.add('no');b.onclick=null;b.style.cursor='default';});
+  const fb=$('qfb');fb.className=S.scores[0]>=2?'qfb show pos':'qfb show gd';fb.innerHTML=S.scores[0]>=2?'✅ 很好！正确排除了干扰选项。':'💡 支架颜色和心情不影响摆的快慢哦。';$('mSub').style.display='none';
+  setTimeout(()=>renderQ(1),1400);}
+function selQ(el,i){document.querySelectorAll('#quizBox .qopt').forEach(b=>{b.onclick=null;b.style.cursor='default';});const q=QD[curQ];
+  if(i===q.ans){el.classList.add('ok');S.scores[curQ]=2;}else{el.classList.add('no');document.querySelectorAll('#quizBox .qopt')[q.ans].classList.add('ok');S.scores[curQ]=0;}
+  const fb=$('qfb');
+  if(curQ===1){fb.className=i===1?'qfb show pos':'qfb show gd';fb.innerHTML=i===1?'✅ 对！同时改变两个条件就无法判断原因。':'💡 她同时改了绳长和重量，无法确定哪个是原因。';}
+  else{fb.className=i===0?'qfb show pos':'qfb show gd';fb.innerHTML=i===0?'✅ 正确！保持其他不变，只改绳长。':'💡 要研究绳长，就只改绳长，其他都不变。';}
+  setTimeout(()=>renderQ(curQ+1),1400);}
+function selSelf(i){S.scores[3]=i;document.querySelectorAll('#quizBox .qopt').forEach((b,j)=>{b.onclick=null;b.style.cursor='default';if(j===i)b.classList.add('sel');});
+  const k=S.scores[0]+S.scores[1]+S.scores[2];
+  if(S.scores[0]===0)S.path='C';else if(S.scores[1]>=2&&S.scores[2]>=2){S.path='A';if(i===2)S.path='B';}else{S.path='B';if(k<=1&&i!==0)S.path='C';}
+  S.steps.push({n:'完成诊断',t:now()});
+  const pn={A:'首席研究员实验室 🔬',B:'实验构建工作坊 🛠️',C:'探究起步站 🚀'};
+  $('qfb').className='qfb show pos';$('qfb').innerHTML='正在为你准备：<strong>'+pn[S.path]+'</strong>';
+  setTimeout(enterPath,1400);}
+function enterPath(){setProg(2);$('helpBtn').classList.add('show');
+  if(S.path==='C')$('kcBtn').classList.add('show');
+  S.steps.push({n:'进入学习路径',t:now()});
+  if(S.path==='A'){showPage('p-A');initFreeA();}
+  else if(S.path==='B'){showPage('p-B');}
+  else{bindMc1Choices();showPage('p-C');initMc1();initCmpPends();}}
+
+// ==================== Path A 模拟器 ====================
+let freeA;
+function initFreeA(){if(freeA)freeA.destroy();freeA=new Pend($('freeCV_A'),{len:40,mass:50,amp:20,scale:3,onSwing(n){$('freeA_cnt').textContent=n;}});}
+function updFreeA(){const l=+$('srA_len').value,w=+$('srA_wt').value,a=+$('srA_amp').value;$('svA_len').textContent=l+'cm';$('svA_wt').textContent=w+'g';$('svA_amp').textContent=a+'°';if(freeA){freeA.update({len:l,mass:w,amp:a});$('freeA_cnt').textContent='0';}}
+function togCh(id){$(id).classList.toggle('open');}
+
+// ==================== Path B ====================
+function selFac(el,f){document.querySelectorAll('#Bs1 .fcard').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');S.factor=f;
+  const nm={length:'摆绳长度',weight:'摆锤重量',angle:'摆动幅度'};
+  $('fConf').style.display='block';$('fConf').innerHTML='✅ 你选择研究<strong>'+nm[f]+'</strong>的影响。';$('btnBs2').style.display='inline-flex';}
+function goBs(n){for(let i=1;i<=4;i++){$('Bs'+i).style.display=i===n?'block':'none';$('sB'+i).className='sd'+(i<n?' done':i===n?' on':'');}
+  if(n===2)renderGuess();if(n===3)initDrag();if(n===4)genPlan();window.scrollTo(0,0);}
+function renderGuess(){const nm={length:'摆绳长度',weight:'摆锤重量',angle:'摆动幅度'};
+  $('B_guessArea').innerHTML=`<p>你选择研究的是<strong>${nm[S.factor]}</strong>。</p><p>我的猜想：${nm[S.factor]}越 <select class="fsel"><option>长/大/重</option><option>短/小/轻</option></select>，摆得越 <select class="fsel"><option>快</option><option>慢</option></select>。</p>`;}
+// 拖拽
+const TD={length:[{t:'摆绳长度（30cm）',tp:'iv',id:'iv1'},{t:'摆绳长度（60cm）',tp:'iv',id:'iv2'},{t:'摆锤重量（50g）',tp:'cv',id:'cv1'},{t:'摆动幅度（小幅）',tp:'cv',id:'cv2'}],
+  weight:[{t:'摆锤重量（50g）',tp:'iv',id:'iv1'},{t:'摆锤重量（100g）',tp:'iv',id:'iv2'},{t:'摆绳长度（30cm）',tp:'cv',id:'cv1'},{t:'摆动幅度（小幅）',tp:'cv',id:'cv2'}],
+  angle:[{t:'摆动幅度（小幅）',tp:'iv',id:'iv1'},{t:'摆动幅度（大幅）',tp:'iv',id:'iv2'},{t:'摆绳长度（30cm）',tp:'cv',id:'cv1'},{t:'摆锤重量（50g）',tp:'cv',id:'cv2'}]};
+let DS={},dragEl=null;
+function initDrag(){const pool=$('tagPool');const tags=[...TD[S.factor]].sort(()=>Math.random()-.5);pool.innerHTML='';$('dzTags-iv').innerHTML='';$('dzTags-cv').innerHTML='';$('dz-iv').classList.remove('ok','over');$('dz-cv').classList.remove('ok','over');$('dragFb').className='qfb';$('dragFb').innerHTML='';$('btnBs4').style.display='none';DS={};
+  tags.forEach(tag=>{const el=document.createElement('div');el.className='dtag';el.textContent=tag.t;el.draggable=true;el.dataset.id=tag.id;el.dataset.tp=tag.tp;
+    el.addEventListener('dragstart',e=>{dragEl=el;el.classList.add('dragging');e.dataTransfer.setData('text',tag.id);});
+    el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+    // touch
+    let clone;
+    el.addEventListener('touchstart',e=>{if(!el.draggable)return;e.preventDefault();dragEl=el;clone=el.cloneNode(true);clone.style.cssText='position:fixed;z-index:999;opacity:.8;pointer-events:none;';document.body.appendChild(clone);el.classList.add('dragging');},{passive:false});
+    el.addEventListener('touchmove',e=>{if(!clone)return;e.preventDefault();const tc=e.touches[0];clone.style.left=(tc.clientX-40)+'px';clone.style.top=(tc.clientY-20)+'px';},{passive:false});
+    el.addEventListener('touchend',e=>{if(!dragEl||!clone)return;document.body.removeChild(clone);dragEl.classList.remove('dragging');
+      const tc=e.changedTouches[0];['dz-iv','dz-cv'].forEach(zid=>{const z=$(zid),r=z.getBoundingClientRect();
+        if(tc.clientX>=r.left&&tc.clientX<=r.right&&tc.clientY>=r.top&&tc.clientY<=r.bottom){doDrop({preventDefault:()=>{},currentTarget:z,dataTransfer:{getData:()=>dragEl.dataset.id}},zid.split('-')[1]);}});
+      clone=null;dragEl=null;});
+    pool.appendChild(el);});}
+function doOver(e){e.preventDefault();e.currentTarget.classList.add('over');}
+function doLv(e){e.currentTarget.classList.remove('over');}
+function doDrop(e,zone){e.preventDefault();e.currentTarget.classList.remove('over');const id=e.dataTransfer.getData('text');const el=document.querySelector(`.dtag[data-id="${id}"]`);if(!el)return;const tp=el.dataset.tp;
+  if((tp==='iv'&&zone==='cv')||(tp==='cv'&&zone==='iv')){$('dragFb').className='qfb show gd';$('dragFb').innerHTML=tp==='iv'?'这是你要研究的变量，应放在"要改变的条件"里哦。':'这个条件应该保持不变，放到"保持不变"那一栏。';return;}
+  $('dzTags-'+zone).appendChild(el);el.draggable=false;DS[id]=zone;
+  $('dragFb').className='qfb show pos';$('dragFb').innerHTML=tp==='iv'?'没错！设计了不同的数值来做对比。':'对！这个条件需要保持不变。';
+  const tags=TD[S.factor];if(tags.every(t=>DS[t.id])){const ok=tags.every(t=>(t.tp==='iv'&&DS[t.id]==='iv')||(t.tp==='cv'&&DS[t.id]==='cv'));
+    if(ok){$('dz-iv').classList.add('ok');$('dz-cv').classList.add('ok');$('dragFb').innerHTML='🎉 变量分类完成！逻辑非常清晰。';$('btnBs4').style.display='inline-flex';}}}
+function genPlan(){const nm={length:'摆绳长度',weight:'摆锤重量',angle:'摆动幅度'};const f=S.factor;
+  let h=`<p>研究问题：<strong>${nm[f]}</strong>是否影响摆的快慢。</p>`;
+  if(f==='length')h+=`<p>实验：两个摆，绳长 <strong>30cm</strong> 和 <strong>60cm</strong>，摆锤都是 <select class="fsel"><option>50g</option></select>，幅度 <select class="fsel"><option>相同</option></select>。</p>`;
+  else if(f==='weight')h+=`<p>实验：两个摆，摆锤 <strong>50g</strong> 和 <strong>100g</strong>，绳长都是 <select class="fsel"><option>40cm</option></select>，幅度相同。</p>`;
+  else h+=`<p>实验：两个摆，幅度 <strong>小幅</strong> 和 <strong>大幅</strong>，绳长 <select class="fsel"><option>40cm</option></select>，摆锤 <select class="fsel"><option>50g</option></select>。</p>`;
+  h+=`<p>各摆动15次，秒表计时，重复 <input type="number" class="fblank" value="3" min="1" max="10" style="width:50px;"> 次取平均值。</p>`;
+  $('B_planForm').innerHTML=h;}
+
+// ==================== Path C ====================
+let mc1P;const cmpPs=[];
+function initMc1(){if(mc1P)mc1P.destroy();mc1P=new Pend($('mc1CV'),{len:45,mass:50,amp:20,labels:true,scale:2.4});}
+function initCmpPends(){cmpPs.forEach(p=>p.destroy());cmpPs.length=0;
+  cmpPs.push(new Pend($('cmp1a'),{len:15,mass:50,amp:18,scale:3}));
+  cmpPs.push(new Pend($('cmp1b'),{len:32,mass:50,amp:18,scale:2}));
+  cmpPs.push(new Pend($('cmp1c'),{len:50,mass:50,amp:18,scale:2}));
+  cmpPs.push(new Pend($('cmp2a'),{len:30,mass:30,amp:18,scale:2.2}));
+  cmpPs.push(new Pend($('cmp2b'),{len:30,mass:100,amp:18,scale:2.2}));
+  cmpPs.push(new Pend($('cmp3a'),{len:30,mass:50,amp:8,scale:2.2}));
+  cmpPs.push(new Pend($('cmp3b'),{len:30,mass:50,amp:32,scale:2.2}));}
+function bindMc1Choices(){
+  document.querySelectorAll('#mc1 .qopt').forEach(btn=>{
+    btn.disabled=false;btn.classList.remove('ok','no');
+    btn.onclick=()=>chkMc1(btn,btn.dataset.correct==='true');
+  });
+  $('mc1fb').className='qfb';$('mc1fb').innerHTML='';
+}
+function chkMc1(el,ok){
+  if(ok){
+    document.querySelectorAll('#mc1 .qopt').forEach(b=>{b.disabled=true;});
+    el.classList.add('ok');$('mc1fb').className='qfb show pos';$('mc1fb').innerHTML='✅ 对了！摆由摆绳和摆锤组成。你已经认识了摆的基本结构！';setTimeout(()=>goMc(2),1200);
+  }else{
+    el.disabled=true;el.classList.add('no');$('mc1fb').className='qfb show gd';$('mc1fb').innerHTML='💡 这个组合不完整。看看动画中橙色标注的两个部分，再试一次。';
+  }}
+function goMc(n){document.querySelectorAll('.mstep').forEach(s=>s.classList.remove('on'));$('mc'+n).classList.add('on');
+  for(let i=1;i<=5;i++){$('sC'+i).className='sd'+(i<n?' done':i===n?' on':'');}window.scrollTo(0,0);
+  if(n===4)initGuessPends();}
+function cmpAns(el,type){const g=el.dataset.cmp;document.querySelectorAll(`[data-cmp="${g}"]`).forEach(b=>{b.onclick=null;b.style.cursor='default';});
+  el.classList.add(type);const fb=$('cmpFb'+g);
+  if(type==='ok'){fb.className='qfb show pos';fb.innerHTML=['','👀 没错，短绳摆得最快！','👀 虽然重量不同，但摆动速度一样！','👀 没错！幅度不同但速度相同。'][g];}
+  else{fb.className='qfb show gd';fb.innerHTML=['','仔细看，短绳的摆明显更快哦！','仔细看，它们的速度其实一样！','虽然大幅走的路更长，但摆一次时间一样！'][g];}
+  if(g==='1')setTimeout(()=>{$('cmpGroup2').style.display='block';$('cmpGroup2').scrollIntoView({behavior:'smooth'});},1000);
+  if(g==='2')setTimeout(()=>{$('cmpGroup3').style.display='block';$('cmpGroup3').scrollIntoView({behavior:'smooth'});},1000);
+  if(g==='3')setTimeout(()=>{$('cmpSummary').style.display='block';$('cmpSummary').scrollIntoView({behavior:'smooth'});},1000);}
+function chkMc3(ok){document.querySelectorAll('#mc3 .qopt').forEach(b=>{b.onclick=null;b.style.cursor='default';});
+  if(ok){$('mc3r').classList.add('ok');$('mc3fb').className='qfb show pos';$('mc3fb').innerHTML='✅ 科学直觉很好！';$('mc3ex').style.display='block';}
+  else{$('mc3w').classList.add('no');$('mc3fb').className='qfb show gd';$('mc3fb').innerHTML='🤔 两个摆除了绳长不同，<strong>重量也不一样</strong>哦。再想想？';$('mc3r').onclick=()=>chkMc3(true);$('mc3r').style.cursor='pointer';}}
+let guessPends=[];
+function initGuessPends(){guessPends.forEach(p=>p.destroy());guessPends=[new Pend($('guessCV1'),{len:20,mass:50,amp:18,scale:2.4}),new Pend($('guessCV2'),{len:50,mass:50,amp:18,scale:1.8})];}
+function cGuess(el,v){document.querySelectorAll('#mc4 .qopt').forEach(b=>{b.onclick=null;b.style.cursor='default';});el.classList.add('sel');
+  $('mc4fb').className='qfb show pos';$('mc4fb').innerHTML='好的，你做出了猜想！接下来我们设计实验来验证。';S.factor='length';
+  setTimeout(()=>goMc(5),1200);}
+function chkCf(){const f1=$('cf1').value,f2=$('cf2').value,f3=$('cf3').value,f4=$('cf4').value,f5=$('cf5').value;
+  $('cf1f').innerHTML=f1==='length'?' ✅':(f1?' ❓ 点我看看':"");
+  $('cf2f').innerHTML=(f2&&+f2!==30&&+f2>0)?' ✅':(f2==='30'?' 💡 要和30不一样哦':'');
+  $('cf3f').innerHTML=f3==='same'?' ✅':(f3==='diff'?' ❓ 点我看看':'');
+  $('cf4f').innerHTML=f4==='same'?' ✅':(f4==='diff'?' 💡 幅度也要一样哦':'');
+  if(f1==='length'&&f2&&+f2!==30&&+f2>0&&f3==='same'&&f4==='same'&&f5&&+f5>=1){
+    $('mc5res').style.display='block';$('mc5res').innerHTML=`<p>🎉 <strong>你的实验计划：</strong>绳长30cm和${f2}cm对比，摆锤都是50g，幅度一样，各摆15次，重复${f5}次取平均。<br><strong style="color:var(--ok);">很棒！你掌握了控制变量的方法！</strong></p>`;
+    $('btnCsub').style.display='inline-flex';$('c-upflow').classList.add('show');}}
+
+// ==================== 提交设计 → 模拟实验 ====================
+function submitDesign(){if(!S.factor)S.factor='length';S.steps.push({n:'完成实验设计',t:now()});setProg(3);showPage('p-sim');
+  $('kcBtn').classList.add('show');initExpSim();
+  // 根据路径显示不同引导
+  if(S.path==='C')$('tblGuide').innerHTML='每做完一次实验，数据会自动填进表格。做3次是为了让结果更准确哦！';
+  else if(S.path==='B')$('tblGuide').innerHTML='做完每次实验后点"记录数据"，数据自动填入。';
+  else $('tblGuide').innerHTML='请根据实验记录数据。建议做3次取平均值。';}
+
+// ==================== 多因素连续研究 ====================
+function resetExperimentRound(){
+  eRun=false;e1Done=false;e2Done=false;
+  if(eP1){eP1.destroy();eP1=null;}if(eP2){eP2.destroy();eP2=null;}
+  S.trialNum=0;S.data=[[],[]];S.avg1=0;S.avg2=0;
+  for(let i=1;i<=3;i++){$('d'+i+'a').value='';$('d'+i+'b').value='';}
+  $('avg1').textContent='-';$('avg2').textContent='-';
+  $('expT1').textContent='0.00';$('expT2').textContent='0.00';$('expS1').textContent='0';$('expS2').textContent='0';
+  $('btnRun').disabled=false;$('btnRun').textContent='▶ 开始实验';$('btnRec').style.display='none';$('btnAnlz').style.display='none';
+  $('tblFeedback').style.display='none';$('tblFeedback').innerHTML='';
+  ['an1','an2','an3','an4'].forEach(id=>$(id).value='');
+  document.querySelectorAll('#p-anlz input[type="checkbox"]').forEach(el=>el.checked=false);
+  $('conclusionCard').style.display='none';$('conclusionCard').innerHTML='';$('nextStudyActions').style.display='none';
+}
+function renderNextResearch(){
+  const grid=$('nextResearchGrid');
+  grid.innerHTML=Object.keys(FACTORS).map(f=>{
+    const meta=FACTORS[f],r=S.experiments[f];
+    if(r)return `<div class="research-item done"><div class="research-status">✅ 已完成</div><h4>${meta.icon} ${meta.name}</h4><p>两组平均：${r.avg1.toFixed(2)}s / ${r.avg2.toFixed(2)}s</p><p>结论：${r.summary}</p></div>`;
+    return `<div class="research-item"><div class="research-status">待研究</div><h4>${meta.icon} ${meta.name}</h4><p>换一个因素，继续用控制变量法进行对比实验。</p><button class="btn btn-p" onclick="beginNextResearch('${f}')">研究${meta.short} →</button></div>`;
+  }).join('');
+}
+function openNextResearch(){
+  const remaining=Object.keys(FACTORS).filter(f=>!S.experiments[f]);
+  if(!remaining.length){goCollab();return;}
+  renderNextResearch();setProg(2);showPage('p-next-research');
+}
+function beginNextResearch(f){
+  if(!FACTORS[f]||S.experiments[f])return;
+  resetExperimentRound();S.factor=f;
+  if($('factorA'))$('factorA').value=f;
+  document.querySelectorAll('#Bs1 .fcard').forEach(c=>c.classList.toggle('sel',c.dataset.factor===f));
+  $('fConf').style.display='block';$('fConf').innerHTML='✅ 新一轮将研究<strong>'+FACTORS[f].name+'</strong>的影响。';$('btnBs2').style.display='inline-flex';
+  $('B_planForm').innerHTML='';S.steps.push({n:'开始研究'+FACTORS[f].name,t:now()});
+  setProg(2);showPage('p-B');goBs(2);
+}
+
+// ==================== 自由模拟器 ====================
+let freeP;
+function initFreeSim(){if(freeP)freeP.destroy();freeP=new Pend($('freeCV'),{len:40,mass:50,amp:20,scale:3.2,onSwing(n){$('freeCnt').textContent=n;}});}
+function updFree(){const l=+$('sr_len').value,w=+$('sr_wt').value,a=+$('sr_amp').value;$('sv_len').textContent=l+'cm';$('sv_wt').textContent=w+'g';$('sv_amp').textContent=a+'°';if(freeP){freeP.update({len:l,mass:w,amp:a});$('freeCnt').textContent='0';}}
+
+// ==================== 对比实验 ====================
+let eP1,eP2,eRun=false,eStart,e1Done,e2Done;
+function initExpSim(){const f=S.factor;const nm={length:'摆绳长度',weight:'摆锤重量',angle:'摆动幅度'};
+  let c1,c2,l1,l2;
+  if(f==='length'){c1={len:30,mass:50,amp:20};c2={len:60,mass:50,amp:20};l1='30cm·50g·20°';l2='60cm·50g·20°';}
+  else if(f==='weight'){c1={len:40,mass:50,amp:20};c2={len:40,mass:100,amp:20};l1='40cm·50g·20°';l2='40cm·100g·20°';}
+  else{c1={len:40,mass:50,amp:10};c2={len:40,mass:50,amp:35};l1='40cm·50g·10°';l2='40cm·50g·35°';}
+  $('simDesc').innerHTML=`研究<strong>${nm[f]}</strong>的影响。两组实验同时开始，各摆动15次。`;
+  $('expL1').textContent='组1：'+l1;$('expL2').textContent='组2：'+l2;$('th1').textContent='组1（'+l1+'）';$('th2').textContent='组2（'+l2+'）';
+  if(eP1)eP1.destroy();if(eP2)eP2.destroy();const sc=1.6;
+  eP1=new Pend($('expCV1'),{...c1,scale:sc,onSwing(n){$('expS1').textContent=n;if(n>=15&&!e1Done){e1Done=true;chkExpDone();}}});
+  eP2=new Pend($('expCV2'),{...c2,scale:sc,onSwing(n){$('expS2').textContent=n;if(n>=15&&!e2Done){e2Done=true;chkExpDone();}}});
+  eP1.stop();eP2.stop();}
+function runExp(){if(eRun)return;eRun=true;e1Done=false;e2Done=false;$('expS1').textContent='0';$('expS2').textContent='0';$('expT1').textContent='0.00';$('expT2').textContent='0.00';
+  $('expT1')._lk=false;$('expT2')._lk=false;$('btnRun').disabled=true;$('btnRun').textContent='实验中...';
+  eP1.len+=(Math.random()-.5)*.4;eP2.len+=(Math.random()-.5)*.4;eP1.start();eP2.start();eStart=performance.now();updTimer();}
+function updTimer(){if(!eRun)return;const t=(performance.now()-eStart)/1000;if(!e1Done)$('expT1').textContent=t.toFixed(2);if(!e2Done)$('expT2').textContent=t.toFixed(2);requestAnimationFrame(updTimer);}
+function chkExpDone(){const t=(performance.now()-eStart)/1000;
+  if(e1Done&&!$('expT1')._lk){$('expT1').textContent=t.toFixed(2);$('expT1')._lk=true;}
+  if(e2Done&&!$('expT2')._lk){$('expT2').textContent=t.toFixed(2);$('expT2')._lk=true;}
+  if(e1Done&&e2Done){eRun=false;eP1.stop();eP2.stop();
+    // reset len noise
+    const f=S.factor;if(f==='length'){eP1.len=30;eP2.len=60;}else{eP1.len=40;eP2.len=40;}
+    $('btnRun').disabled=false;$('btnRun').textContent='▶ 再做一次';$('btnRec').style.display='inline-flex';}}
+function recTrial(){if(S.trialNum>=3)return;S.trialNum++;
+  const t1=parseFloat($('expT1').textContent),t2=parseFloat($('expT2').textContent);S.data[0].push(t1);S.data[1].push(t2);
+  $('d'+S.trialNum+'a').value=t1.toFixed(2);$('d'+S.trialNum+'b').value=t2.toFixed(2);$('btnRec').style.display='none';
+  // Path C feedback
+  if(S.path==='C'){$('tblFeedback').style.display='block';$('tblFeedback').innerHTML=S.trialNum<3?`第${S.trialNum}次数据已记录！还需要做${3-S.trialNum}次。`:'✅ 三次数据都记录好了！';}
+  if(S.trialNum>=3){const a1=(S.data[0].reduce((a,b)=>a+b)/3).toFixed(2),a2=(S.data[1].reduce((a,b)=>a+b)/3).toFixed(2);
+    $('avg1').textContent=a1+'s';$('avg2').textContent=a2+'s';S.avg1=+a1;S.avg2=+a2;$('btnAnlz').style.display='inline-flex';
+    if(S.path==='C'){$('tblFeedback').innerHTML=`✅ 三次平均后，组1是 <strong>${a1}s</strong>，组2是 <strong>${a2}s</strong>。`;}}
+  else $('btnRun').textContent='▶ 开始第'+(S.trialNum+1)+'次';}
+
+// ==================== 分析 ====================
+function goAnalyze(){setProg(4);showPage('p-anlz');S.steps.push({n:'完成数据收集',t:now()});
+  const a1=S.avg1,a2=S.avg2,diff=Math.abs(a1-a2).toFixed(2);const f=S.factor;const nm={length:'摆绳长度',weight:'摆锤重量',angle:'摆动幅度'};
+  let l1,l2;if(f==='length'){l1='30cm（短绳）';l2='60cm（长绳）';}else if(f==='weight'){l1='50g（轻）';l2='100g（重）';}else{l1='小幅';l2='大幅';}
+  // 数据回顾（不给柱状图）
+  $('dataReview').innerHTML=`<p>你研究的是：<strong>${nm[f]}</strong></p><p>组1（${l1}）：三次平均 = <strong style="color:var(--pri);">${a1}秒</strong></p><p>组2（${l2}）：三次平均 = <strong style="color:var(--ok);">${a2}秒</strong></p><p>两组相差：<strong>${diff}秒</strong></p>`;}
+function genConclusion(){const c=$('conclusionCard');c.style.display='block';
+  const f=S.factor,meta=FACTORS[f],diff=Math.abs(S.avg1-S.avg2),affects=f==='length';
+  const summary=affects?'绳越长摆得越慢，绳越短摆得越快':`改变${meta.name}后，两组时间几乎一样`;
+  c.innerHTML=affects?
+    `<h2>🎉 实验结论</h2><div class="big">${meta.name} <span style="color:var(--pri);">影响</span> 摆的快慢</div><p>${summary}。</p>`:
+    `<h2>🎉 实验结论</h2><div class="big">${meta.name} <span style="color:var(--ok);">影响不明显</span></div><p>${summary}（仅差${diff.toFixed(2)}秒）。</p>`;
+  const firstSave=!S.experiments[f];
+  S.experiments[f]={factor:f,data:S.data.map(row=>[...row]),avg1:S.avg1,avg2:S.avg2,diff,affects,summary,student:{factor:$('an1').value,result:$('an2').value,claim:$('an3').value,sentence:$('an4').value.trim()},savedAt:now()};
+  if(firstSave)S.steps.push({n:'完成'+meta.name+'研究',t:now()});
+  const done=Object.keys(S.experiments).length,remaining=3-done;
+  $('researchProgressText').innerHTML=remaining?`你已完成 <strong>${done}/3</strong> 个因素，还可以继续研究 ${remaining} 个。`:'🎉 你已完成三个因素的全部研究！';
+  $('btnContinueResearch').style.display=remaining?'inline-flex':'none';$('nextStudyActions').style.display='block';
+  $('nextStudyActions').scrollIntoView({behavior:'smooth'});}
+
+// ==================== 协作 ====================
+function goCollab(){setProg(5);showPage('p-collab');$('helpBtn').classList.remove('show');$('kcBtn').classList.remove('show');S.steps.push({n:'进入交流展示',t:now()});renderWall();}
+function renderWall(){
+  const mock=[{f:'length',p:'绳长30cm vs 50cm，摆锤50g。结论：绳长影响快慢。'},{f:'weight',p:'摆锤50g vs 100g，绳长40cm。结论：重量影响不明显。'},{f:'length',p:'绳长20cm vs 60cm，摆锤80g。结论：绳短摆得快。'},{f:'angle',p:'小幅 vs 大幅，绳长30cm。结论：本实验范围内幅度影响不明显。'},{f:'weight',p:'摆锤30g vs 80g，绳长30cm。结论：重量影响不明显。'}];
+  const mine=Object.values(S.experiments).map(r=>({f:r.factor,p:`我的实验：平均 ${r.avg1.toFixed(2)}s vs ${r.avg2.toFixed(2)}s。${r.summary}。`,mine:true}));
+  const all=[...mock,...mine].sort(()=>Math.random()-.5);
+  $('planWall').innerHTML=all.map(p=>`<div class="pcard"><div class="pcard-tag">${FACTORS[p.f].icon} ${FACTORS[p.f].name}</div>${p.mine?'<div style="font-size:11px;color:var(--ok);font-weight:900;">⭐ 我的成果</div>':'<div style="font-size:11px;color:var(--ink2);font-weight:700;">示例成果</div>'}<p>${p.p}</p></div>`).join('');
+  const ct={length:0,weight:0,angle:0};all.forEach(p=>ct[p.f]++);$('stLen').textContent=ct.length;$('stWt').textContent=ct.weight;$('stAng').textContent=ct.angle;
+  $('myResearchSummary').innerHTML=Object.keys(FACTORS).map(f=>{const meta=FACTORS[f],r=S.experiments[f];return r?`<div class="research-item done"><div class="research-status">✅ 已完成</div><h4>${meta.icon} ${meta.name}</h4><p>平均：${r.avg1.toFixed(2)}s / ${r.avg2.toFixed(2)}s</p><p>${r.summary}。</p></div>`:`<div class="research-item"><div class="research-status">待研究</div><h4>${meta.icon} ${meta.name}</h4><p>还没有进行这项对比实验。</p></div>`;}).join('');
+  const done=Object.keys(S.experiments).length;$('collabContinueWrap').style.display=done<3?'block':'none';
+  $('combinedConclusion').innerHTML=done===3?`<p>通过分别研究三个因素，你发现：<br><strong style="color:var(--pri);">摆的快慢主要与摆绳长度有关</strong>——绳越长越慢，绳越短越快。<br>在本实验范围内，摆锤重量和摆动幅度的影响不明显。</p>`:`<p>你已经完成 <strong>${done}/3</strong> 个因素的研究。当三项实验都完成后，这里会生成完整的综合结论。</p>`;
+}
+
+// ==================== 复盘 ====================
+function goReview(){showPage('p-review');S.steps.push({n:'开始复盘',t:now()});
+  $('timeline').innerHTML=S.steps.map(s=>`<div class="tl-i"><h4>${s.n}</h4><p>${s.t}</p></div>`).join('');}
+function selRef(el){document.querySelectorAll('#p-review .qopt').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+
+// ==================== 知识卡片 ====================
+function toggleKC(){$('kcPanel').classList.toggle('open');$('kcOverlay').classList.toggle('show');}
+function openKC(idx){toggleKC();/* scroll to card */}
+// 知识卡片里的小摆动画
+let kcP;
+window.addEventListener('load',()=>{setTimeout(()=>{kcP=new Pend($('kcCV1'),{len:25,mass:40,amp:18,scale:2,py:16});},500);});
+
+// ==================== 举手 ====================
+function submitHelp(){const t=$('helpTxt').value;if(t.trim()){try{const h=JSON.parse(localStorage.getItem('p-helps')||'[]');h.push({t,time:new Date().toISOString(),path:S.path});localStorage.setItem('p-helps',JSON.stringify(h));alert(pendulumLanguage==='zh'?'问题已保存在本机。':pendulumLanguage==='en'?'Question saved on this device.':'问题已保存在本机。 / Question saved on this device.');}catch(error){alert('暂时无法保存，请直接联系老师。 / Could not save. Please ask your teacher directly.');return;}}$('helpTxt').value='';$('helpModal').classList.remove('show');}
+</script>
+<script>
+// Offline, authored translations. Student input and all event handlers stay intact.
+const pendulumTerms = Object.fromEntries(`
+热身|Warm-up
+设计|Plan
+实验|Experiment
+结论|Conclusion
+交流|Share
+一个摆，有时候摆得快，|Sometimes a pendulum swings quickly,
+有时候摆得慢——|and sometimes it swings slowly.
+到底是什么在控制它的快慢？|What affects how fast it swings?
+今天你将亲自设计实验、收集数据、分析结果，找出影响摆的快慢的真正原因。|Plan experiments, collect data and use evidence to find out what affects a pendulum's swing rate.
+先来玩一玩：拖动滑块，观察摆的变化|Explore: move the sliders and watch the pendulum.
+摆绳长度|String length
+摆锤重量|Bob mass
+摆动幅度|Release angle
+试试只改一个滑块，观察快慢变化。|Change just one slider. Does the swing rate change?
+摆动：|Complete swings:
+摆动|Swings
+我探索完了，出发！|Ready to investigate!
+不管你现在对摆了解多少，接下来的旅程都是为你量身准备的。|The next activities will offer support based on your starting point.
+首席研究员实验室|Lead Researcher Lab
+你对摆的研究已经有很好的基础。现在先自由探索模拟器，然后设计一套完整的实验方案。|You have a strong starting point. Explore the simulator, then write a complete investigation plan.
+自由探索模拟器|Free Exploration
+拖动滑块观察摆的变化，找到你想研究的问题。|Move the sliders and choose a question to investigate.
+我的实验方案|My Investigation Plan
+包括：研究问题、猜想、实验步骤、需要记录的数据、如何保证公平性。|Include your question, prediction, method, data to collect and how to make the test fair.
+我想重点研究：|My chosen factor:
+在这里写下你的实验方案|Write your investigation plan here
+研究问题|Research question
+我的猜想|My prediction
+实验步骤|Method
+需要记录的数据|Data to record
+如何保证公平性（控制变量）|How to make a fair test (controlled variables)
+帮我理思路（切换到引导模式）|Help me plan (guided mode)
+高阶挑战卡|Extra Challenges
+多因素挑战|Investigate All Three Factors
+设计一套方案，把绳长、重量、幅度三个因素都研究了。你需要几组实验？|Plan separate fair tests for length, mass and release angle. How many groups will you need?
+写下你的多因素方案|Write your plan for all three factors
+审稿人模式|Review a Plan
+找出下面方案的问题并写修改建议：|Find problems in this plan and suggest improvements:
+小华的方案：|Xiaohua's plan:
+研究摆绳长度的影响。两个摆，一个绳长20cm挂30g，另一个绳长50cm挂80g。各摆10次，看哪个快。|Test string length: use a 20 cm string with a 30 g bob and a 50 cm string with an 80 g bob. Time 10 complete swings for each. Which is faster?
+指出至少两个问题|Identify at least two problems
+方案完成，进入实验|Plan ready — start the experiment
+实验构建工作坊|Investigation Workshop
+一步一步搭建你的实验方案，每一步都有工具帮你。|Build your plan step by step, with support along the way.
+第一步：选择你想研究的问题|Step 1: Choose your question
+是否影响摆的快慢，完成实验计划：|— complete your plan to test its effect on swing rate:
+是否影响摆的快慢|— does it affect swing rate?
+下一步|Next
+第二步：做出你的猜想|Step 2: Make a prediction
+第三步：变量分类|Step 3: Sort the variables
+把下面的标签拖到正确的框里：|Drag each label into the correct box:
+要改变的条件（自变量）|What we change (independent variable)
+把要改变的条件拖到这里|Place the variable you change here
+观察和测量的结果（因变量）|What we measure (dependent variable)
+摆动15次所用时间|Time for 15 complete swings
+保持不变的条件（控制变量）|What we keep the same (controlled variables)
+把其他条件拖到这里|Place the conditions you keep the same here
+第四步：完成实验方案|Step 4: Complete your plan
+挑战升级：试试自由设计另一个因素的实验？|Ready for a challenge? Plan a test for another factor independently.
+探究起步站|Inquiry Starter Station
+先来认识摆，然后一步步搞清楚怎么研究它。|Meet the pendulum, then learn how to investigate it.
+别担心，每一步都很小，你一定可以的。|Take it one small step at a time.
+认识摆|Meet the Pendulum
+这是一个|This is a
+。由|. It has a
+摆绳和摆锤|String and bob
+摆绳|string
+摆锤|bob
+组成。|.
+和|and
+摆从一边摆到另一边再摆回来 =|From one side to the other and back again =
+摆动一次|one complete swing
+摆的组成部分包括？|Which parts make up the pendulum?
+支架和绳子|Stand and string
+秒表和支架|Stopwatch and stand
+什么可能影响摆的快慢？|What might affect the swing rate?
+观察每组对比，两个摆同时摆动：|Watch each comparison. The pendulums swing at the same time.
+第一组：绳子长短不同|Comparison 1: Different string lengths
+短绳的摆最快|The shortest pendulum swings fastest
+它们一样快|They swing at the same rate
+第二组：摆锤轻重不同|Comparison 2: Different bob masses
+重的更快|The heavier bob swings faster
+一样快|The same rate
+第三组：摆动幅度不同|Comparison 3: Different release angles
+大幅更快|The larger angle gives faster swings
+总结：|Think about it:
+绳长、重量、幅度都可能影响快慢。到底哪个是真正原因？我们需要做实验验证！|Length, mass and angle are possible factors. Which ones affect swing rate? Let's test them!
+继续|Continue
+为什么只能改变一个条件？|Why change only one variable?
+视频：控制变量法——只改一个条件的实验（45秒）|Video placeholder: Fair tests — change one variable (45 seconds)
+小明的实验：|Xiaoming's experiment:
+第一个摆：绳长|Pendulum 1: string length
+第二个摆：绳长|Pendulum 2: string length
+结果第一个更快。小明说：|The first pendulum is faster. Xiaoming says:
+"绳子短，摆就快。"|"A shorter string makes the pendulum faster."
+小明的结论靠谱吗？|Does this test support Xiaoming's conclusion?
+靠谱，绳子短确实摆得快|Yes. A shorter string really does swing faster.
+不太靠谱，两个摆不止绳长不同|Not yet. More than the string length was changed.
+你发现了！|You spotted it!
+小明的两个摆绳长和重量都不同。做实验时|Both string length and bob mass were different. In a fair test,
+每次只能改变一个条件|change only one variable at a time
+，其他保持一样。这叫|and keep the others the same. This is called
+控制变量|controlling variables
+这是科学家最重要的思维方式之一！|This is an important way scientists investigate.
+我明白了|I understand
+提出问题与猜想|Ask a Question and Predict
+我们来研究：|Let's investigate:
+摆绳长度是否影响摆的快慢？|Does string length affect swing rate?
+你的猜想：短绳的摆会更快还是更慢？|Your prediction: will the shorter pendulum swing faster or slower?
+我猜短绳的摆更快|I predict the shorter pendulum will swing faster
+我猜短绳的摆更慢|I predict the shorter pendulum will swing slower
+我猜它们一样快|I predict they will swing at the same rate
+你来当小科学家|Be a Scientist
+要改变的条件是：|The variable I will change:
+请选择|Choose
+第一个摆绳长30cm，第二个绳长|The first string is 30 cm. The second string is
+摆锤重量都应该：|The bob masses should be:
+都是50克|Both 50 g
+一个50一个100|One 50 g, the other 100 g
+摆动幅度应该：|The release angles should be:
+保持一样|The same
+可以不同|Different
+重复实验|Repeat the experiment
+次取平均值|times and calculate the mean
+你已掌握基本方法！要不要试试拖拽工具设计另一个因素？|You have learned the basics! Try planning a test for another factor with the sorting tool.
+模拟实验室|Simulation Lab
+根据你的实验方案，进行对比实验并记录数据。|Follow your plan, compare the pendulums and record your data.
+正式实验：对比记录|Experiment: Compare and Record
+开始实验|Start experiment
+记录数据|Record data
+实验数据记录表|Results Table
+平均值|Mean
+数据收集完成|Data collection complete
+分析结果|Analyse results
+数据分析与结论|Analyse and Conclude
+观察数据|Look at the Data
+得出结论（填空）|Draw a Conclusion
+通过实验，我发现：|My experiment shows:
+我改变的条件是：|The variable I changed:
+实验结果是：|The results show:
+两组数据差异明显|The two groups are clearly different
+两组数据几乎一样|The two groups are almost the same
+所以我的结论是：|My conclusion:
+这个因素影响摆的快慢|This factor affects swing rate
+这个因素不影响摆的快慢|This factor does not affect swing rate
+用一句话说说你的发现：|Describe your finding in one sentence:
+例如：摆绳越长，摆得越慢|For example: a longer string gives slower swings
+生成结论卡|Create conclusion card
+误差分析|Thinking About Measurement Error
+真实实验中数据可能不完全精确，想想可能的误差来源：|Real measurements are not exact. What could cause differences?
+计时不够精确（按秒表的反应时间）|Reaction time when using a stopwatch
+释放摆锤时角度不一致|Releasing the bob from different angles
+数摆动次数时数错|Miscounting complete swings
+空气阻力的影响|Air resistance
+做多次实验取平均值，就是为了减小误差，让结果更可靠。|Repeating and calculating a mean can reduce random error and make results more reliable.
+本轮研究已保存|This Investigation Is Recorded
+继续研究另一个因素|Investigate Another Factor
+查看研究汇总|View my results
+你的诊断和学习路径会保留。选择一个还没研究的因素，直接开始新一轮实验设计。|Keep your starting assessment. Choose an untested factor to begin another investigation.
+暂时结束，查看研究汇总|Pause here and view my results
+摆的研究发布会|Pendulum Research Showcase
+你的多项实验成果和示例成果都在这里。|See your investigations alongside example results.
+我的研究汇总|My Investigation Summary
+继续完成未研究的因素|Continue with an untested factor
+全班数据总览|Showcase totals (including examples)
+研究绳长|Length investigations
+研究重量|Mass investigations
+研究幅度|Angle investigations
+综合结论|Combined Conclusion
+进入复盘|Reflect on my learning
+探究复盘站|Reflection Station
+你的完整探究旅程|Your Investigation Journey
+反思|Reflect
+这次探究中最难的是？|What was most challenging?
+想出要研究什么|Choosing a question
+区分自变量和控制变量|Identifying independent and controlled variables
+搞清楚哪些条件要保持不变|Deciding what to keep the same
+从数据中得出结论|Drawing a conclusion from data
+如果再做一次，你会怎样改进？|How would you improve your next investigation?
+写下你的想法|Write your thoughts
+你完成了一次完整的科学探究！|You completed a scientific investigation!
+提出问题|Ask a question
+做出猜想|Make a prediction
+设计实验|Plan a fair test
+收集数据|Collect data
+得出结论|Draw a conclusion
+这就是科学家的工作方式。|This is how scientists work.
+知识卡片|Science Help Cards
+什么是摆？|What is a pendulum?
+一根不会伸长的细线，一端固定，一端挂重物。拉到一边放开，它就会来回摆动。这就是一个摆！|A pendulum has a bob hanging from a fixed point on a string that does not stretch. Pull it to one side and let go: it swings back and forth.
+摆长是什么？|What is pendulum length?
+从固定点（支点）到摆锤中心的距离。注意：不只是绳子的长度，而是从挂点到重物中心的距离。|Measure from the pivot to the centre of the bob, not just along the string.
+怎么数摆动次数？|How do we count swings?
+摆从一边摆到另一边再摆回来 = 摆动1次。口诀：去→回 = 1次。|One complete swing goes from one side to the other and back. Out and back = 1 swing.
+怎么计时？|How do we measure time?
+喊"开始"的同时按下秒表，数够15次摆动时按停。时间越长说明摆得越慢。|Start the stopwatch as you release the bob. Stop after 15 complete swings. More time means a slower swing rate.
+什么是控制变量？|What are controlled variables?
+做实验时每次只改变一个条件，其他条件都保持一样。这样才能知道结果到底是谁造成的。|Change one variable and keep the others the same. This helps you identify what caused a difference.
+什么是对比实验？|What is a fair comparison?
+做两组实验来比较。一组改变了条件，一组没改变，通过对比看出差异。|Compare two groups with only one variable changed. Look for differences in the results.
+举手问老师|Ask for Help
+我不太理解|I need help with
+取消|Cancel
+发送|Save question
+下面哪些因素可能影响摆的快慢？|Which factors might affect swing rate?
+可多选|Choose more than one
+摆绳的长度|String length
+摆锤的重量|Bob mass
+摆动的幅度|Release angle
+支架的颜色|Stand colour
+实验者的心情|The experimenter's mood
+小红准备两个摆：绳长30cm挂50g，另一个绳长60cm挂100g。记录摆动15次的时间。|Xiaohong uses a 30 cm string with a 50 g bob and a 60 cm string with a 100 g bob. She times 15 complete swings.
+她的实验设计有问题吗？|Is there a problem with her test?
+没问题|No problem
+有问题，同时改变了两个条件|Yes. Two variables were changed at once.
+应该多摆几次|She should count more swings
+不确定|I am not sure
+如果你来帮小红改进，你会怎么做？|How would you improve Xiaohong's test of string length?
+都用50g摆锤，只改绳长|Use 50 g bobs for both; change only string length
+都用30cm绳，只改重量|Use 30 cm strings for both; change only bob mass
+同时改变再观察|Change both and observe
+再想想|I need more time to think
+接下来你要自己设计实验，你现在的感觉是？|How do you feel about planning your own experiment?
+想好了，快开始|I am ready to start
+大概有方向，需要帮助|I have some ideas but need help
+不太清楚，希望一步步来|I would like step-by-step support
+开始探究|Started the investigation
+问题|Question
+确认|Confirm
+很好！正确排除了干扰选项。|Good thinking! You ruled out the unrelated factors.
+支架颜色和心情不影响摆的快慢哦。|Stand colour and mood do not affect swing rate.
+对！同时改变两个条件就无法判断原因。|Yes! Changing two variables makes it hard to identify the cause.
+她同时改了绳长和重量，无法确定哪个是原因。|Both length and mass changed, so we cannot tell which caused the difference.
+正确！保持其他不变，只改绳长。|Correct! Change only length and keep everything else the same.
+要研究绳长，就只改绳长，其他都不变。|To test length, change only length and keep the other variables the same.
+完成诊断|Completed the starting assessment
+正在为你准备：|Your next activity:
+进入学习路径|Started the learning pathway
+你选择研究的是|Your chosen factor is
+你选择研究|You chose to investigate
+的影响|and its effect on swing rate
+这是你要研究的变量，应放在"要改变的条件"里哦。|This is the variable you are testing. Put it in the box for what you change.
+这个条件应该保持不变，放到"保持不变"那一栏。|Keep this condition the same. Put it in the controlled variables box.
+没错！设计了不同的数值来做对比。|Yes! Compare different values of this variable.
+对！这个条件需要保持不变。|Yes! Keep this condition the same.
+变量分类完成！逻辑非常清晰。|Variables sorted! Your fair test is taking shape.
+对了！摆由摆绳和摆锤组成。你已经认识了摆的基本结构！|Correct! The pendulum has a string and a bob.
+这个组合不完整。看看动画中橙色标注的两个部分，再试一次。|Look at the two parts labelled in orange. Try another answer.
+没错，短绳摆得最快！|Yes, the shortest pendulum swings fastest!
+虽然重量不同，但摆动速度一样！|The masses are different, but the swing rates are the same!
+没错！幅度不同但速度相同。|Yes! This model shows the same rate at different release angles.
+仔细看，短绳的摆明显更快哦！|Look closely: the shorter pendulum swings faster.
+仔细看，它们的速度其实一样！|Look closely: they swing at the same rate.
+虽然大幅走的路更长，但摆一次时间一样！|In this model, a larger swing travels farther but takes the same time.
+科学直觉很好！|Good scientific thinking!
+两个摆除了绳长不同，|The strings have different lengths, and
+重量也不一样|the bob masses are different too
+哦。再想想？|. Think again.
+好的，你做出了猜想！接下来我们设计实验来验证。|Prediction recorded! Now plan a test.
+点我看看|Open a help card
+要和30不一样哦|Choose a length different from 30
+幅度也要一样哦|Keep the release angles the same too
+你的实验计划|Your investigation plan
+很棒！你掌握了控制变量的方法！|Well done! You have planned a fair test.
+完成实验设计|Completed the plan
+每做完一次实验，数据会自动填进表格。做3次是为了让结果更准确哦！|After each trial, select Record data. Repeat three times to improve reliability.
+做完每次实验后点"记录数据"，数据自动填入。|After each trial, select Record data to fill the table.
+请根据实验记录数据。建议做3次取平均值。|Record the results of three trials and calculate the mean.
+已完成|Completed
+两组平均|Group means
+待研究|Not yet investigated
+换一个因素，继续用控制变量法进行对比实验。|Choose another factor and plan a new fair test.
+新一轮将研究|This investigation will test
+开始研究|Started investigating
+两组实验同时开始，各摆动15次。|Start both groups together and time 15 complete swings.
+实验中|Experiment running
+再做一次|Repeat trial
+三次数据都记录好了！|All three trials are recorded!
+次数据已记录！还需要做|recorded. Trials still needed:
+三次平均后，组|Mean of three trials — group
+完成数据收集|Completed data collection
+你研究的是|Your investigated factor
+三次平均|Mean of three trials
+两组相差|Difference between groups
+绳越长摆得越慢，绳越短摆得越快|Longer strings swing more slowly; shorter strings swing faster
+两组时间几乎一样|the two times are almost the same
+实验结论|Experiment Conclusion
+影响不明显|No clear effect in this model
+有明显影响|A clear effect
+摆的快慢|swing rate
+仅差|difference:
+你已完成三个因素的全部研究！|You have investigated all three factors!
+你已完成|You have completed
+个因素，还可以继续研究|factors. Factors still to investigate:
+进入交流展示|Opened the research showcase
+绳长影响快慢|String length affects swing rate
+重量影响不明显|Bob mass has no clear effect
+绳短摆得快|Shorter strings swing faster
+本实验范围内幅度影响不明显|Release angle has no effect in this model
+我的实验|My experiment
+我的成果|My results
+示例成果|Example results
+还没有进行这项对比实验。|You have not tested this factor yet.
+通过分别研究三个因素，你发现：|After testing the three factors separately:
+摆的快慢主要与摆绳长度有关|String length affects swing rate
+——绳越长越慢，绳越短越快。|— longer strings swing more slowly; shorter strings swing faster.
+在本实验范围内，摆锤重量和摆动幅度的影响不明显。|In this simplified model, bob mass and release angle do not change the swing rate.
+你已经完成|You have completed
+个因素的研究。当三项实验都完成后，这里会生成完整的综合结论。|factors. Complete all three to see the combined conclusion.
+开始复盘|Started reflection
+支点|Pivot
+短绳|Short string
+中绳|Medium string
+长绳|Long string
+小幅|Small angle
+大幅|Large angle
+轻|Light
+重|Heavy
+长/大/重|longer / larger / heavier
+短/小/轻|shorter / smaller / lighter
+摆得越|the swing becomes
+越|becomes
+快|faster
+慢|slower
+研究|Investigate
+摆锤都是|Both bobs:
+绳长都是|Both strings:
+幅度相同|Same release angle
+幅度一样|Same release angle
+相同|The same
+各摆动|Each pendulum completes
+秒表计时|Time with a stopwatch
+重复|Repeat
+次取平均|trials, then calculate the mean
+对比|compared with
+绳长|String length
+幅度|Release angle
+重量|Mass
+平均|Mean
+改变|Changing
+后|gives
+影响|affects
+完成|Completed
+开始第|Start trial
+组|Group
+第|Trial
+次所用时间|complete swings — elapsed time
+次|swings / trials
+秒|seconds
+是|is
+个|factors
+摆|pendulum
+在本实验范围内影响不明显|No clear effect in this model
+两组实验同时开始|Both groups start together
+各摆|Each completes
+已发送给老师|Question saved on this device
+摆锤质量|Bob mass
+完整摆动|Complete swing
+公平实验|Fair test
+两组实验同时开始|Both groups start together
+两|Two
+`.trim().split('\n').map(line=>{const i=line.indexOf('|');return [line.slice(0,i),line.slice(i+1)];}));
+
+const pendulumKeys=Object.keys(pendulumTerms).sort((a,b)=>b.length-a.length);
+const pendulumPattern=new RegExp(pendulumKeys.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'gu');
+function pendulumEnglish(text){
+  return text.replace(/开始第(\d+)次/g,'Start trial $1').replace(/第(\d+)次/g,'Trial $1')
+    .replace(/组(\d+)/g,'Group $1').replace(/还需要做(\d+)次/g,'Trials remaining: $1')
+    .replace(pendulumPattern,word=>' '+pendulumTerms[word]+' ')
+    .replace(/第(\d+)次/g,'Trial $1').replace(/（/g,' (').replace(/）/g,') ')
+    .replace(/：/g,': ').replace(/，/g,', ').replace(/。/g,'. ')
+    .replace(/、/g,', ').replace(/！/g,'! ').replace(/？/g,'? ')
+    .replace(/([a-zA-Z])([\u3400-\u9fff])/g,'$1 $2')
+    .replace(/[ \t]+/g,' ').replace(/ +([,.!?;:)])/g,'$1').trim();
+}
+
+let pendulumLanguage='bi';
+const translatedNodes=new WeakMap();
+const translatedAttributes=new WeakMap();
+const chineseText=/[\u3400-\u9fff]/;
+function languageText(original){
+  if(pendulumLanguage==='zh')return original;
+  const english=pendulumEnglish(original);
+  return pendulumLanguage==='en'?english:original+' / '+english;
+}
+function translatePendulum(root){
+  if(root.nodeType===1 && root.closest('script,style,textarea,[data-no-translate]'))return;
+  const nodes=[];
+  if(root.nodeType===3)nodes.push(root);
+  else {const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);while(walker.nextNode())nodes.push(walker.currentNode);}
+  for(const node of nodes){
+    if(!node.parentElement||node.parentElement.closest('script,style,textarea,[data-no-translate]'))continue;
+    let record=translatedNodes.get(node);
+    if(record && node.nodeValue!==record.output)record=null;
+    if(!record){if(!chineseText.test(node.nodeValue))continue;record={original:node.nodeValue};}
+    const output=languageText(record.original);
+    if(node.nodeValue!==output)node.nodeValue=output;
+    record.output=output;translatedNodes.set(node,record);
+  }
+  const controls=root.nodeType===1?[root,...root.querySelectorAll('[placeholder]')]:[];
+  for(const control of controls){
+    if(!control.hasAttribute('placeholder'))continue;
+    let original=translatedAttributes.get(control);
+    if(!original){original=control.getAttribute('placeholder');if(!chineseText.test(original))continue;translatedAttributes.set(control,original);}
+    control.setAttribute('placeholder',languageText(original));
+  }
+}
+const translationObserver=new MutationObserver(records=>{
+  translationObserver.disconnect();
+  for(const record of records){
+    if(record.type==='characterData')translatePendulum(record.target);
+    else record.addedNodes.forEach(node=>{if(node.nodeType===1||node.nodeType===3)translatePendulum(node);});
+  }
+  watchTranslations();
+});
+function watchTranslations(){translationObserver.observe(document.body,{childList:true,subtree:true,characterData:true});}
+function setPendulumLanguage(value){
+  pendulumLanguage=['zh','en','bi'].includes(value)?value:'bi';
+  document.documentElement.lang=pendulumLanguage==='en'?'en':'zh-CN';
+  document.body.dataset.language=pendulumLanguage;
+  translationObserver.disconnect();translatePendulum(document.body);watchTranslations();
+}
+document.getElementById('languageChoice').addEventListener('change',event=>setPendulumLanguage(event.target.value));
+setPendulumLanguage('bi');
+
+</script>
+</body>
+</html>

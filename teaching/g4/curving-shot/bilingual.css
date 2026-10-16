@@ -1,0 +1,33 @@
+/* Bilingual presentation layer for the open-day game. */
+* { font-family: "Arial", "PingFang SC", "Microsoft YaHei", sans-serif !important; }
+.title-bg[data-v-654ee6f0]::after {
+  content: "Bend the Ball, Chase the Goal · Try a Curving Shot";
+  position: absolute; left: 0; top: 304px; width: 100%; text-align: center;
+  color: #fff; font-size: 29px; font-weight: 800; letter-spacing: .02em;
+  text-shadow: 0 3px 8px rgba(30, 59, 33, .9), 0 1px 2px #174b28;
+}
+.start-btn[data-v-654ee6f0] {
+  white-space: pre-line; font-size: 31px; line-height: 1.18;
+  padding-top: 17px; box-sizing: border-box;
+}
+.loading-text { font-size: 27px !important; }
+.action-header[data-v-8cfbaa42] { width: 330px; left: 25px; bottom: 475px; }
+.action-header-text[data-v-8cfbaa42] { white-space: pre-line; text-align: center; line-height: 1.08; font-size: 25px; }
+.slowText[data-v-8cfbaa42] { white-space: pre-line; line-height: 1.12; font-size: 30px; }
+.card-label[data-v-8cfbaa42] { white-space: pre-line; font-size: 26px; line-height: 1.12; margin-bottom: 5px; }
+.slider-labels[data-v-8cfbaa42] { font-size: 21px; }
+.setdatas[data-v-8cfbaa42] { width: 330px; }
+.setdata-item[data-v-8cfbaa42] { font-size: 23px; white-space: nowrap; padding: 6px 8px; }
+.start[data-v-8cfbaa42] { background: #bf6a08; border-radius: 22px; box-shadow: 0 4px 12px rgba(80,37,0,.25); }
+.bilingual-button, .bilingual-slow { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.08; }
+.bilingual-button { color: #fff; }
+.bilingual-button strong { font-size: 44px; }
+.bilingual-button small { font-size: 24px; font-weight: 700; margin-top: 5px; }
+.slow-btn[data-v-8cfbaa42] { background: #fff; border-radius: 48px; border: 4px solid #d6c4a3; box-sizing: border-box; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 9px rgba(0,0,0,.3); }
+.bilingual-slow { color: #8b4c09; }
+.bilingual-slow strong { font-size: 34px; }
+.bilingual-slow small { font-size: 21px; font-weight: 700; margin-top: 3px; }
+.modal-box[data-v-8cfbaa42] { height: 360px; }
+.modal-main[data-v-8cfbaa42] { white-space: pre-line; text-align: center; font-size: 47px; line-height: 1.14; margin-bottom: 16px; }
+.modal-sub[data-v-8cfbaa42] { white-space: pre-line; text-align: center; font-size: 27px; line-height: 1.28; margin-bottom: 16px; }
+.modal-close[data-v-8cfbaa42] { font-size: 24px; }

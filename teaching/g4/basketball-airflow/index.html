@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Offline bilingual classroom animation: observe airflow, compare two tracers over the same time, and reveal pressure and force around a falling basketball with no spin, counterclockwise spin, or clockwise spin.">
+<title>Basketball Airflow · 篮球气流 · V3</title>
+<style>
+:root{color-scheme:light;--ink:#14364b;--muted:#526c7b;--cyan:#007fa5;--blue:#0089b3;--red:#c84c48;--gold:#c79000;--line:#d3e4ec;--sky:#eff9fd;--font:Roboto,"Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",Arial,sans-serif}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);background:white;font-family:var(--font)}button,input{font:inherit}button,summary{cursor:pointer}button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #e9a900;outline-offset:3px}button:disabled{opacity:.5;cursor:default}
+.app{min-height:100svh;display:flex;flex-direction:column}header{background:var(--cyan);color:#fff;padding:17px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}h1{font-size:clamp(25px,2.5vw,38px);line-height:1.15;margin:0;font-weight:700}h1 span{display:block;font-size:.56em;margin-top:6px;font-weight:500}.lesson-tag{text-align:right;font-size:14px;line-height:1.6}.lesson-tag strong{display:block;font-size:16px}main{width:min(1600px,100%);margin:0 auto;padding:14px 24px 0;flex:1;display:flex;flex-direction:column;min-height:0}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}.group{display:flex;gap:4px;background:#edf3f6;border-radius:11px;padding:4px}.group button{border:0;background:transparent;border-radius:8px;padding:8px 14px;color:var(--muted);font-size:15px;line-height:1.25;font-weight:600;min-height:47px}.group button small{display:block;font-size:12px;font-weight:400;margin-top:3px}.group button[aria-pressed="true"]{background:var(--ink);color:white}.steps button{min-width:93px}.step-num{font-size:12px;display:inline-block;margin-right:5px;opacity:.7}.playback{display:flex;gap:6px;align-items:center}.control{min-height:44px;border:1px solid #bed3de;border-radius:9px;background:#fff;color:var(--ink);padding:8px 11px;font-size:14px;line-height:1.25}.control small{display:block;font-size:11px;margin-top:3px;color:var(--muted)}.control[aria-pressed="true"]{background:#e7f5fc;border-color:#7fbacf}.pause{min-width:83px}.reference{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:1px 3px 10px;color:var(--muted);font-size:14px;line-height:1.45}.reference strong{font-weight:650;color:var(--ink)}.reference .directions{white-space:nowrap;font-size:15px}
+.scene{position:relative;flex:1;min-height:340px;isolation:isolate;overflow:hidden;border-radius:16px;background:radial-gradient(ellipse at 50% 45%,#fff 0%,#f1faff 46%,#e9f6fb 100%)}canvas{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:0}.side{position:absolute;top:48%;transform:translateY(-50%);width:clamp(170px,19vw,255px);padding:12px 13px;background:#f0f9fdef;border-radius:12px;text-align:center;z-index:1}.side.left{left:18px;--side:var(--red)}.side.right{right:18px;--side:var(--blue)}.side-id{font-size:13px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);margin-bottom:7px}.side h2{font-size:clamp(21px,2.2vw,31px);line-height:1.15;margin:0;font-weight:700}.side .translation{font-size:clamp(17px,1.6vw,23px);line-height:1.35;margin-top:8px;color:var(--muted)}.side .swatch{height:4px;width:60%;border-radius:3px;background:var(--side);margin:15px auto 0}.surface{margin-top:15px;font-size:17px;line-height:1.4;color:var(--muted)}.surface span{display:block;font-size:15px}.pressure{margin-top:16px;padding-top:14px;border-top:1px solid #cddfe7;font-size:22px;font-weight:650;line-height:1.25}.pressure span{display:block;font-size:18px;font-weight:400;margin-top:6px}.spin-label,.motion-label,.force-label{position:absolute;transform:translateX(-50%);text-align:center;line-height:1.25;z-index:1;pointer-events:none}.spin-label{font-size:18px;font-weight:650;background:#f3fbfee6;border-radius:8px;padding:5px 10px;white-space:nowrap}.spin-label span{display:block;font-size:15px;font-weight:400;margin-top:3px;color:var(--muted)}.motion-label{font-size:17px;font-weight:650;white-space:nowrap}.force-label{background:#fff4cddd;border-radius:8px;padding:6px 9px;font-size:17px;font-weight:650;white-space:nowrap}.force-label span{display:block;font-size:14px;font-weight:400;margin-top:3px}
+.caption{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 4px 10px;min-height:77px}.caption-copy{flex:1;text-align:center}.caption strong{display:block;font-size:clamp(17px,1.7vw,24px);line-height:1.3}.caption span{display:block;color:var(--muted);font-size:clamp(14px,1.35vw,19px);line-height:1.4;margin-top:5px}.replay{border-color:var(--blue);color:#006e92;min-width:135px}.replay small{color:#35728b}footer{width:min(1600px,100%);margin:auto;padding:0 28px 11px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:20px;align-items:flex-start}details{max-width:1030px}summary{line-height:1.6;list-style:none}summary::before{content:"+ ";font-weight:700}details[open] summary::before{content:"− "}.notes{padding:11px 0 4px;font-size:14px;line-height:1.7}.notes p{margin:0 0 9px}.notes a{color:#00769f}.shortcuts{white-space:nowrap;padding-top:2px}.app:fullscreen{background:white;overflow:auto}
+@media(min-width:1050px){.app{height:100svh;min-height:670px}.scene{min-height:300px}.toolbar,.reference,.caption,header,footer{flex-shrink:0}}
+@media(max-width:1150px){.toolbar{justify-content:center}.group button{padding:8px 11px}.steps button{min-width:86px}.lesson-tag{display:none}.shortcuts{display:none}}
+@media(max-width:1049px){header{padding:17px 20px}main{padding:12px 16px 0}.scene{flex:none;height:510px}.side{width:190px}.side h2{font-size:23px}.side .translation{font-size:18px}.caption{min-height:84px}footer{padding:0 20px 12px}}
+@media(max-width:800px){.scene{height:500px}.side{top:15px;transform:none;width:calc(50% - 26px);padding:10px 8px;background:#f0f9fde0}.side.left{left:14px}.side.right{right:14px}.side-id{font-size:11px;margin-bottom:5px}.side h2{font-size:22px}.side .translation{font-size:17px;margin-top:5px}.side .swatch{width:46%;margin-top:10px;height:3px}.surface{display:none!important}.pressure{font-size:18px;margin-top:8px;padding-top:8px}.pressure span{font-size:15px;margin-top:4px}.caption strong{font-size:18px}.caption span{font-size:15px}.reference{font-size:12px}.reference .directions{font-size:13px}.spin-label{font-size:17px}.spin-label span{font-size:14px}.force-label{font-size:16px}}
+@media(max-width:540px){header{padding:16px}h1{font-size:26px}h1 span{font-size:16px}main{padding:10px 10px 0}.toolbar{gap:8px}.steps{width:100%}.steps button{flex:1;min-width:0;padding:8px 7px}.group button{font-size:14px}.group button small{font-size:12px}.playback{gap:5px}.control{padding:7px 9px;font-size:13px}.control small{font-size:11px}.fullscreen{display:none}.modes{flex:1 1 100%;display:grid;grid-template-columns:.75fr 1.4fr 1fr;width:100%}.modes button{min-width:0;padding:8px 4px;font-size:clamp(12px,3.4vw,14px)}.reference{display:block;text-align:center;padding:3px 0 8px}.reference .directions{display:block;margin-top:4px}.scene{height:475px;border-radius:12px}.side{width:calc(50% - 17px)}.side.left{left:9px}.side.right{right:9px}.side h2{font-size:20px}.side .translation{font-size:16px}.side-id{letter-spacing:.05em}.pressure{font-size:17px}.pressure span{font-size:15px}.caption{flex-direction:column;gap:9px;padding:12px 3px 13px}.caption strong{font-size:18px}.caption span{font-size:15px}.replay{width:100%;max-width:280px}.replay small{display:inline;margin-left:5px;font-size:12px}footer{padding:0 14px 14px}.notes{font-size:13px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<header><h1>Air around a spinning basketball<span>观察旋转篮球周围的空气</span></h1><div class="lesson-tag"><strong>Observe · Compare · Explain</strong>观察 · 比较 · 解释</div></header>
+<main>
+  <div class="toolbar" aria-label="Classroom controls / 课堂控制">
+    <div class="group steps" role="group" aria-label="Learning step / 学习步骤">
+      <button id="step-1" type="button" aria-pressed="true"><b class="step-num">1</b>Observe<small>观察</small></button>
+      <button id="step-2" type="button" aria-pressed="false"><b class="step-num">2</b>Compare<small>同时追踪两点</small></button>
+      <button id="step-3" type="button" aria-pressed="false"><b class="step-num">3</b>Explain<small>气压与侧向力</small></button>
+    </div>
+    <div class="group modes" role="group" aria-label="Spin mode / 旋转方式">
+      <button id="no-spin" type="button" aria-pressed="false">No spin<small>不旋转</small></button>
+      <button id="ccw" type="button" aria-pressed="true">Counterclockwise<small>逆时针旋转</small></button>
+      <button id="cw" type="button" aria-pressed="false">Clockwise<small>顺时针旋转</small></button>
+    </div>
+    <div class="playback">
+      <button class="control pause" id="pause" type="button" aria-pressed="false">Pause<small>暂停</small></button>
+      <button class="control" id="slow" type="button" aria-pressed="false">Slow<small>慢放</small></button>
+      <button class="control fullscreen" id="fullscreen" type="button">Full screen<small>全屏</small></button>
+    </div>
+  </div>
+  <div class="reference"><span><strong>Following the falling ball</strong> / 跟着下落的篮球看 · 正面视角</span><span class="directions">Ball ↓ 篮球下落　·　Relative air ↑ 相对气流向上</span></div>
+  <div id="scene" class="scene" role="img" aria-label="A counterclockwise spinning basketball, with moving airflow tracers on both sides. / 逆时针旋转的篮球，两侧显示移动的气流标记。">
+    <canvas id="flow" aria-hidden="true"></canvas>
+    <div class="side left" aria-hidden="true"><div class="side-id">Left side / 左侧</div><h2 id="left-en">Watch the air</h2><div id="left-cn" class="translation">观察空气流动</div><div class="swatch"></div><div class="surface" id="left-surface" hidden>Surface moves ↓<span>左侧表面向下</span></div><div class="pressure" id="left-pressure" hidden>Higher pressure<span>气压较高</span></div></div>
+    <div class="side right" aria-hidden="true"><div class="side-id">Right side / 右侧</div><h2 id="right-en">Watch the air</h2><div id="right-cn" class="translation">观察空气流动</div><div class="swatch"></div><div class="surface" id="right-surface" hidden>Surface moves ↑<span>右侧表面向上</span></div><div class="pressure" id="right-pressure" hidden>Lower pressure<span>气压较低</span></div></div>
+    <div class="spin-label" id="spin-label" aria-hidden="true">Counterclockwise<span>逆时针旋转</span></div>
+    <div class="motion-label" id="motion-label" aria-hidden="true">Ball falls / 篮球下落</div>
+    <div class="force-label" id="force-label" aria-hidden="true" hidden>Force from the air →<span>空气的侧向力</span></div>
+    
+  </div>
+  <div class="caption"><div class="caption-copy" role="status" aria-live="polite"><strong id="caption-en">Which side has faster airflow?</strong><span id="caption-cn">先观察：靠近篮球的哪一侧，空气流得更快？</span></div><button class="control replay" id="replay" type="button" hidden>Track again<small>再次同时追踪</small></button></div>
+</main>
+<footer><details id="teacher-notes"><summary>Teaching notes / 教师提示 · 简化模型</summary><div class="notes">
+  <p><strong>三个步骤：</strong>“观察”先隐藏快慢结论；“比较”让 A、B 两个标记从球两侧同一高度同时出发，并在相同的模型时间后自动暂停；“解释”显示两侧气压比较和空气对球的侧向力。可随时切换不旋转、逆时针旋转与顺时针旋转。保持同一正面视角时，顺时针模式会把左右流速、压力与侧向力方向相应反转。“再次同时追踪”会重新开始这次比较。</p>
+  <p><strong>怎样读图：</strong>红、蓝分别用于辨认左、右侧。淡色小标记表示背景气流；大标记 A、B 及其轨迹用于跟踪同一段时间内的移动。空心圆是起点。速度差主要观察球两侧近旁，不能把颜色当成整个半边空气都以同一速度流动。两个标记的试验时间相同，不要求它们同时绕过篮球或在球后方会合。</p>
+  <p><strong>观察视角：</strong>镜头跟着下落的篮球，球在画面中居中；向下箭头表示篮球相对教室的运动，向上的气流表示空气相对篮球的运动。它不表示教室里的空气整体向上吹。“慢放”改变所有动画的播放速度，不改变两侧速度关系。</p>
+  <p><strong>模型范围：</strong>使用二维理想绕流与环流模型，定性呈现旋转球侧近旁的速度差。标记、时间与距离均为教学示意，不是篮球实验测量值。真实球的三维流动、边界层与尾流更复杂；压力标签只比较两侧相应区域。动画不计算实际下落轨迹，也不表示任意流动中都能简单用流速判断气压。</p>
+  <p>科学参考：<a href="https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/ideal-lift-of-a-spinning-ball/" target="_blank" rel="noopener noreferrer">NASA · Ideal Lift of a Spinning Ball</a>。动画可完全离线运行。</p>
+</div></details><span class="shortcuts">1 / 2 / 3：步骤　·　空格：暂停　·　R：再次追踪　·　F：全屏</span></footer>
+</div>
+<script>
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id),canvas=$('flow'),ctx=canvas.getContext('2d'),scene=$('scene'),app=$('app');
+  const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // spin: +1 = counterclockwise, 0 = none, -1 = clockwise, viewed from the front.
+  const state={spin:1,step:1,paused:prefersReduced,slow:false,time:0,angle:0,trial:null};
+  const STARTS=[{x:-1.38,y:.48},{x:1.38,y:.48}],TRIAL_DURATION=1.12;
+  let geometry={w:0,h:0,cx:0,cy:0,r:1,compact:false},paths=[],frameId=0,lastTime=0;
+  let guides=document.createElement('canvas'),guideCtx=guides.getContext('2d');
+  const colors=['#c84c48','#0089b3'];
+  function velocity(x,y,k){
+    const q=Math.max(x*x+y*y,1.000001),q2=q*q;
+    return {x:2*x*y/q2+k*y/q,y:-1+(y*y-x*x)/q2-k*x/q};
+  }
+  function advance(x,y,dt,k){
+    const a=velocity(x,y,k),b=velocity(x+a.x*dt/2,y+a.y*dt/2,k),c=velocity(x+b.x*dt/2,y+b.y*dt/2,k),d=velocity(x+c.x*dt,y+c.y*dt,k);
+    return {x:x+dt*(a.x+2*b.x+2*c.x+d.x)/6,y:y+dt*(a.y+2*b.y+2*c.y+d.y)/6};
+  }
+  function buildPaths(){
+    const k=state.spin*1.05;paths=[];
+    for(let i=0;i<20;i++){
+      let x=-3.135+i*.33,y=3.25,t=0;const points=[{x,y,t}];
+      for(let j=0;j<6000;j++){
+        const v=velocity(x,y,k),dt=.035/Math.max(.2,Math.hypot(v.x,v.y)),p=advance(x,y,dt,k);
+        x=p.x;y=p.y;t+=dt;if(!Number.isFinite(x)||!Number.isFinite(y)||Math.hypot(x,y)<.999)break;points.push({x,y,t});
+        if(y< -3.25||Math.abs(x)>5||t>35)break;
+      }
+      if(points.length>2)paths.push({points,duration:t,offset:(i*.381)%1});
+    }
+    cacheGuides();
+  }
+  function at(path,t){
+    const p=path.points;let low=0,high=p.length-1;
+    while(high-low>1){const mid=(high+low)>>1;if(p[mid].t<=t)low=mid;else high=mid;}
+    const a=p[low],b=p[high],f=Math.max(0,Math.min(1,(t-a.t)/(b.t-a.t||1)));
+    return {x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f};
+  }
+  function xy(p){return {x:geometry.cx+p.x*geometry.r,y:geometry.cy+p.y*geometry.r};}
+  function resize(){
+    const box=scene.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),compact=box.width<=800;
+    geometry={w:box.width,h:box.height,cx:box.width/2,cy:box.height*(compact?.565:.5),r:Math.min(box.height*(compact?.215:.255),box.width*(compact?.235:.15)),compact};
+    canvas.width=Math.round(box.width*dpr);canvas.height=Math.round(box.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+    guides.width=canvas.width;guides.height=canvas.height;guideCtx.setTransform(dpr,0,0,dpr,0,0);
+    const {cx,cy,r,h}=geometry;
+    $('spin-label').style.left=`${cx}px`;$('spin-label').style.top=`${cy-r-57}px`;
+    $('motion-label').style.left=`${cx}px`;$('motion-label').style.top=`${h-(compact?38:33)}px`;
+    $('force-label').style.left=`${compact?cx:cx+r*1.43*state.spin}px`;$('force-label').style.top=`${compact?cy+r+32:cy-68}px`;
+    cacheGuides();render();
+  }
+  function cacheGuides(){
+    if(!geometry.w)return;guideCtx.clearRect(0,0,geometry.w,geometry.h);guideCtx.strokeStyle='rgba(67,132,159,.11)';guideCtx.lineWidth=1;
+    for(const path of paths){guideCtx.beginPath();path.points.forEach((p,i)=>{const q=xy(p);i?guideCtx.lineTo(q.x,q.y):guideCtx.moveTo(q.x,q.y);});guideCtx.stroke();}
+  }
+  function arrow(x1,y1,x2,y2,color,lineWidth=3,head=10){
+    const a=Math.atan2(y2-y1,x2-x1);ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lineWidth;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-head*Math.cos(a-.46),y2-head*Math.sin(a-.46));ctx.lineTo(x2-head*Math.cos(a+.46),y2-head*Math.sin(a+.46));ctx.closePath();ctx.fill();
+  }
+  function drawBall(){
+    const {cx,cy,r}=geometry,g=ctx.createRadialGradient(cx-r*.38,cy-r*.45,r*.08,cx,cy,r*1.15);
+    g.addColorStop(0,'#ffb544');g.addColorStop(.6,'#f9851d');g.addColorStop(1,'#dc590e');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#b44a0c';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();ctx.translate(cx,cy);ctx.rotate(-state.angle);ctx.scale(r,r);ctx.strokeStyle='#3d2d22';ctx.lineWidth=.037;ctx.beginPath();ctx.moveTo(-1,0);ctx.lineTo(1,0);ctx.moveTo(0,-1);ctx.lineTo(0,1);ctx.moveTo(-.65,-.8);ctx.bezierCurveTo(.55,-.57,.55,.57,-.65,.8);ctx.moveTo(.65,-.8);ctx.bezierCurveTo(-.55,-.57,-.55,.57,.65,.8);ctx.stroke();ctx.restore();
+    if(state.spin){
+      const rr=r*1.17;ctx.strokeStyle='#244b61';ctx.lineWidth=3;
+      for(const offset of [0,Math.PI]){const start=state.spin*.37+offset,end=state.spin*-.95+offset;ctx.beginPath();ctx.arc(cx,cy,rr,start,end,state.spin>0);ctx.stroke();const x=cx+rr*Math.cos(end),y=cy+rr*Math.sin(end);arrow(x-9*state.spin*Math.sin(end),y+9*state.spin*Math.cos(end),x,y,'#244b61',3,10);}
+    }
+  }
+  function drawTrial(){
+    const trial=state.trial;if(!trial||state.step!==2)return;
+    trial.dots.forEach((dot,i)=>{
+      const start=xy(STARTS[i]),end=xy(dot),trail=trial.trails[i];ctx.strokeStyle=colors[i];ctx.lineWidth=3.3;ctx.beginPath();trail.forEach((p,j)=>{const s=xy(p);j?ctx.lineTo(s.x,s.y):ctx.moveTo(s.x,s.y);});ctx.stroke();
+      ctx.fillStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(start.x,start.y,7,0,Math.PI*2);ctx.fill();ctx.stroke();
+      ctx.fillStyle=colors[i];ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(end.x,end.y,13,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='700 14px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i?'B':'A',end.x,end.y+.5);
+    });
+  }
+  function draw(){
+    const {w,h,cx,cy,r,compact}=geometry;if(!w||!h)return;ctx.clearRect(0,0,w,h);ctx.drawImage(guides,0,0,w,h);
+    const k=state.spin*1.05,focus=state.step===2;
+    ctx.save();
+    for(const path of paths){
+      const count=Math.max(4,Math.round(path.duration/1.05)),spacing=path.duration/count;
+      for(let i=0;i<count;i++){
+        const t=(state.time+path.offset+i*spacing)%path.duration,p=at(path,t),q=xy(p),prev=xy(at(path,Math.max(0,t-.11)));
+        if(q.y<5||q.y>h-5||q.x<5||q.x>w-5||Math.hypot(p.x,p.y)<1.025)continue;
+        const near=Math.max(0,Math.min(1,(2.7-Math.hypot(p.x,p.y))/1.1));ctx.globalAlpha=(focus?.20:.65)*(.45+near*.55);
+        const color=state.spin?colors[p.x<0?0:1]:'#407e99';ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2.4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(prev.x,prev.y);ctx.lineTo(q.x,q.y);ctx.stroke();ctx.beginPath();ctx.arc(q.x,q.y,2.7,0,Math.PI*2);ctx.fill();
+        if(i%3===0&&!focus){const v=velocity(p.x,p.y,k),mag=Math.hypot(v.x,v.y);arrow(q.x-v.x/mag*5,q.y-v.y/mag*5,q.x,q.y,color,1.8,5.5);}
+      }
+    }
+    ctx.restore();drawBall();drawTrial();
+    if(!(compact&&state.step===3&&state.spin)){const start=cy+r+17,end=h-45;if(end>start+8)arrow(cx,start,cx,end,'#36596d',3,10);}
+    if(state.step===3&&state.spin){arrow(cx,cy,cx+r*1.88*state.spin,cy,'#c79000',Math.max(6,r*.065),19);}
+  }
+  function startTrial(){
+    state.trial={elapsed:0,done:false,dots:STARTS.map(p=>({...p})),trails:STARTS.map(p=>[{...p}])};state.paused=false;render();wake();
+  }
+  function tick(dt){
+    const step=dt*(state.slow?.35:1),modelStep=step*.70;
+    state.time+=modelStep;if(state.spin)state.angle=(state.angle+step*.97*state.spin)%(Math.PI*2);
+    const trial=state.trial;if(!trial||trial.done||state.step!==2)return;
+    let remaining=Math.min(modelStep,TRIAL_DURATION-trial.elapsed),k=state.spin*1.05;
+    while(remaining>1e-9){const d=Math.min(.012,remaining);trial.dots=trial.dots.map(p=>advance(p.x,p.y,d,k));trial.elapsed+=d;remaining-=d;trial.dots.forEach((p,i)=>trial.trails[i].push({...p}));}
+    if(trial.elapsed>=TRIAL_DURATION-1e-8){trial.done=true;state.paused=true;render();}
+  }
+  function render(){
+    const comparing=state.step>=2,explaining=state.step===3;
+    for(let i=1;i<=3;i++)$('step-'+i).setAttribute('aria-pressed',String(state.step===i));
+    $('no-spin').setAttribute('aria-pressed',String(!state.spin));$('ccw').setAttribute('aria-pressed',String(state.spin===1));$('cw').setAttribute('aria-pressed',String(state.spin===-1));
+    $('pause').setAttribute('aria-pressed',String(state.paused));$('pause').innerHTML=state.paused?'Play<small>继续</small>':'Pause<small>暂停</small>';
+    $('slow').setAttribute('aria-pressed',String(state.slow));$('slow').innerHTML=state.slow?'0.35×<small>慢放中</small>':'Slow<small>慢放</small>';
+    $('spin-label').innerHTML=state.spin===1?'Counterclockwise<span>逆时针旋转</span>':state.spin===-1?'Clockwise<span>顺时针旋转</span>':'No spin<span>不旋转</span>';$('spin-label').hidden=state.step===2;
+    $('left-en').textContent=comparing?(state.spin===1?'Slower airflow':state.spin===-1?'Faster airflow':'Similar airflow'):'Watch the air';$('right-en').textContent=comparing?(state.spin===1?'Faster airflow':state.spin===-1?'Slower airflow':'Similar airflow'):'Watch the air';
+    $('left-cn').textContent=comparing?(state.spin===1?'气流较慢':state.spin===-1?'气流较快':'两侧流速相近'):'观察空气流动';$('right-cn').textContent=comparing?(state.spin===1?'气流较快':state.spin===-1?'气流较慢':'两侧流速相近'):'观察空气流动';
+    for(const side of ['left','right']){ $(side+'-surface').hidden=!(comparing&&state.spin);$(side+'-pressure').hidden=!explaining; }
+    $('left-pressure').innerHTML=state.spin===1?'Higher pressure<span>气压较高</span>':state.spin===-1?'Lower pressure<span>气压较低</span>':'Similar pressure<span>两侧气压相近</span>';$('right-pressure').innerHTML=state.spin===1?'Lower pressure<span>气压较低</span>':state.spin===-1?'Higher pressure<span>气压较高</span>':'Similar pressure<span>两侧气压相近</span>';
+    $('left-surface').innerHTML=state.spin===-1?'Surface moves ↑<span>左侧表面向上</span>':'Surface moves ↓<span>左侧表面向下</span>';
+    $('right-surface').innerHTML=state.spin===-1?'Surface moves ↓<span>右侧表面向下</span>':'Surface moves ↑<span>右侧表面向上</span>';
+    $('force-label').innerHTML=state.spin===-1?'← Force from the air<span>空气的侧向力</span>':'Force from the air →<span>空气的侧向力</span>';
+    $('force-label').style.left=`${geometry.compact?geometry.cx:geometry.cx+geometry.r*1.43*state.spin}px`;
+    $('force-label').hidden=!(explaining&&state.spin);$('motion-label').hidden=geometry.compact&&explaining&&state.spin;
+    $('replay').hidden=state.step!==2;
+    const done=state.trial&&state.trial.done;
+    let en,cn;
+    if(state.step===1){en='Which side has faster airflow?';cn='先观察：靠近篮球的哪一侧，空气流得更快？';}
+    else if(state.step===2&&!done){en='Follow A and B for the same amount of time.';cn='两个标记从同一高度同时出发；观察它们在相同时间内的移动。';}
+    else if(state.step===2){en=state.spin===1?'In the same time, B has travelled farther.':state.spin===-1?'In the same time, A has travelled farther.':'Without spin, A and B move symmetrically.';cn=state.spin===1?'动画已暂停：相同时间内，右侧 B 移动得更远。空心圆是起点。':state.spin===-1?'动画已暂停：相同时间内，左侧 A 移动得更远。空心圆是起点。':'动画已暂停：不旋转时，两点对称移动。空心圆是起点。';}
+    else{en=state.spin?'The air exerts a sideways force on the ball.':'Without spin, there is no spin-induced sideways force.';cn=state.spin===1?'这个模型中：左侧气压较高、右侧较低，空气对球产生向右的侧向力。':state.spin===-1?'这个模型中：左侧气压较低、右侧较高，空气对球产生向左的侧向力。':'这个模型中，两侧气压相近，没有由旋转产生的侧向力。';}
+    $('caption-en').textContent=en;$('caption-cn').textContent=cn;
+    
+    const spinName=state.spin===1?'Counterclockwise spin. 逆时针旋转。':state.spin===-1?'Clockwise spin. 顺时针旋转。':'No spin. 不旋转。';
+    const airflow=comparing?(state.spin===1?'Air near the left is slower; near the right is faster. 左侧气流较慢，右侧较快。':state.spin===-1?'Air near the left is faster; near the right is slower. 左侧气流较快，右侧较慢。':'Similar airflow on both sides. 两侧流速相近。'):'Observe the moving air on both sides. 先观察两侧气流。';
+    const force=explaining&&state.spin?(state.spin===1?'The air exerts a force to the right. 空气的侧向力向右。':'The air exerts a force to the left. 空气的侧向力向左。'):'';
+    scene.setAttribute('aria-label',`Following the falling ball. 跟着下落的篮球看。 ${spinName} ${airflow} ${force}`);
+    draw();
+  }
+  function setStep(step){
+    state.step=step;state.trial=null;
+    if(step===2){startTrial();return;}
+    if(step===1)state.paused=prefersReduced;
+    render();wake();
+  }
+  function setSpin(spin){
+    if(![-1,0,1].includes(spin))return;
+    if(state.spin===spin)return;state.spin=spin;state.time=0;state.angle=0;state.trial=null;buildPaths();
+    if(state.step===2){startTrial();return;}render();wake();
+  }
+  function pause(){state.paused=!state.paused;render();wake();}
+  function frame(now){frameId=0;if(state.paused||document.hidden){lastTime=0;return;}const dt=lastTime?Math.min((now-lastTime)/1000,.05):0;lastTime=now;tick(dt);draw();if(!state.paused)frameId=requestAnimationFrame(frame);else lastTime=0;}
+  function wake(){if(state.paused||document.hidden){if(frameId)cancelAnimationFrame(frameId);frameId=0;lastTime=0;}else if(!frameId){lastTime=0;frameId=requestAnimationFrame(frame);}}
+  async function fullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else if(app.requestFullscreen)await app.requestFullscreen();else $('fullscreen').innerHTML='Browser menu<small>请用浏览器全屏</small>';}catch(_){$('fullscreen').innerHTML='Browser menu<small>请用浏览器全屏</small>';}}
+  for(let i=1;i<=3;i++)$('step-'+i).addEventListener('click',()=>setStep(i));
+  $('no-spin').addEventListener('click',()=>setSpin(0));$('ccw').addEventListener('click',()=>setSpin(1));$('cw').addEventListener('click',()=>setSpin(-1));$('pause').addEventListener('click',pause);$('slow').addEventListener('click',()=>{state.slow=!state.slow;render();});$('replay').addEventListener('click',startTrial);$('fullscreen').addEventListener('click',fullscreen);
+  document.addEventListener('fullscreenchange',()=>{$('fullscreen').innerHTML=document.fullscreenElement?'Exit full screen<small>退出全屏</small>':'Full screen<small>全屏</small>';resize();});document.addEventListener('visibilitychange',wake);
+  document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target.closest('button,input,summary,a,textarea,select'))return;if(e.code==='Space'){e.preventDefault();pause();}else if(['1','2','3'].includes(e.key))setStep(Number(e.key));else if(e.key.toLowerCase()==='r'&&state.step===2)startTrial();else if(e.key.toLowerCase()==='f')fullscreen();});
+  new ResizeObserver(resize).observe(scene);buildPaths();resize();wake();
+})();
+</script>
+</body>
+</html>

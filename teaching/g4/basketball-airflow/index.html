@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Offline bilingual classroom animation: observe airflow, compare two tracers over the same time, and reveal pressure and force around a falling basketball with no spin, counterclockwise spin, or clockwise spin.">
-<title>Basketball Airflow · 篮球气流 · V3</title>
+<meta name="description" content="Offline bilingual classroom animation: observe airflow, compare two tracers over the same time, reveal pressure and force, and release a ball to compare no spin, counterclockwise and clockwise falling paths at adjustable spin rates.">
+<title>Basketball Airflow & Falling Paths · 篮球气流与下落轨迹 · V4</title>
 <style>
 :root{color-scheme:light;--ink:#14364b;--muted:#526c7b;--cyan:#007fa5;--blue:#0089b3;--red:#c84c48;--gold:#c79000;--line:#d3e4ec;--sky:#eff9fd;--font:Roboto,"Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",Arial,sans-serif}
 *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);background:white;font-family:var(--font)}button,input{font:inherit}button,summary{cursor:pointer}button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #e9a900;outline-offset:3px}button:disabled{opacity:.5;cursor:default}
@@ -18,17 +18,26 @@
 @media(max-width:800px){.scene{height:500px}.side{top:15px;transform:none;width:calc(50% - 26px);padding:10px 8px;background:#f0f9fde0}.side.left{left:14px}.side.right{right:14px}.side-id{font-size:11px;margin-bottom:5px}.side h2{font-size:22px}.side .translation{font-size:17px;margin-top:5px}.side .swatch{width:46%;margin-top:10px;height:3px}.surface{display:none!important}.pressure{font-size:18px;margin-top:8px;padding-top:8px}.pressure span{font-size:15px;margin-top:4px}.caption strong{font-size:18px}.caption span{font-size:15px}.reference{font-size:12px}.reference .directions{font-size:13px}.spin-label{font-size:17px}.spin-label span{font-size:14px}.force-label{font-size:16px}}
 @media(max-width:540px){header{padding:16px}h1{font-size:26px}h1 span{font-size:16px}main{padding:10px 10px 0}.toolbar{gap:8px}.steps{width:100%}.steps button{flex:1;min-width:0;padding:8px 7px}.group button{font-size:14px}.group button small{font-size:12px}.playback{gap:5px}.control{padding:7px 9px;font-size:13px}.control small{font-size:11px}.fullscreen{display:none}.modes{flex:1 1 100%;display:grid;grid-template-columns:.75fr 1.4fr 1fr;width:100%}.modes button{min-width:0;padding:8px 4px;font-size:clamp(12px,3.4vw,14px)}.reference{display:block;text-align:center;padding:3px 0 8px}.reference .directions{display:block;margin-top:4px}.scene{height:475px;border-radius:12px}.side{width:calc(50% - 17px)}.side.left{left:9px}.side.right{right:9px}.side h2{font-size:20px}.side .translation{font-size:16px}.side-id{letter-spacing:.05em}.pressure{font-size:17px}.pressure span{font-size:15px}.caption{flex-direction:column;gap:9px;padding:12px 3px 13px}.caption strong{font-size:18px}.caption span{font-size:15px}.replay{width:100%;max-width:280px}.replay small{display:inline;margin-left:5px;font-size:12px}footer{padding:0 14px 14px}.notes{font-size:13px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Step 4 uses a stationary classroom view and an independent falling-ball model. */
+input:focus-visible{outline:3px solid #e9a900;outline-offset:4px}.app.dropping{height:auto;min-height:100svh}.drop-lab{display:flex;flex-direction:column;gap:10px}.drop-controls{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:3px 0}.spin-rate-control{flex:1 1 280px;max-width:430px;min-width:240px}.spin-rate-control label{display:flex;justify-content:space-between;gap:12px;font-size:15px;font-weight:650}.spin-rate-control output{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--cyan)}.spin-rate-control input{width:100%;height:25px;margin:7px 0 0;accent-color:var(--cyan);cursor:pointer}.spin-rate-control input:disabled{cursor:default;opacity:.5}.rate-scale{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.drop-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.drop-actions .primary{background:var(--ink);color:white;border-color:var(--ink);min-width:132px}.drop-actions .primary small{color:#e0eff7}.keep-trails{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);min-height:44px;cursor:pointer}.keep-trails input{width:18px;height:18px;accent-color:var(--cyan)}.drop-stage{position:relative;min-height:330px;height:clamp(330px,calc(100svh - 370px),650px);overflow:hidden;border-radius:16px;background:linear-gradient(#eef8fd,#f9fdff 75%,#edf6ed)}.drop-stage canvas{position:absolute;width:100%;height:100%}.drop-heading{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;min-height:28px;font-size:13px;color:var(--muted)}.drop-heading strong{color:var(--ink);font-size:14px}.drop-legend{display:flex;gap:15px;flex-wrap:wrap}.drop-legend span{display:inline-flex;align-items:center;gap:5px}.line-key{display:inline-block;width:22px;height:0;border-top:3px solid var(--series);vertical-align:middle}.line-key.none{border-top-style:dotted}.line-key.cw{border-top-style:dashed}.trace-history{display:flex;gap:6px 14px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted);line-height:1.6;min-height:22px}.trace-history .record{display:inline-flex;gap:6px;align-items:center}.trace-history .record-current{font-weight:700;color:var(--ink)}.drop-note{font-size:12px;line-height:1.5;color:var(--muted)}.dropping .caption{min-height:68px;padding-top:9px}.dropping .caption strong{font-size:20px}.dropping .caption span{font-size:15px}.drop-status{font-variant-numeric:tabular-nums}
+@media(min-width:1050px){.app.dropping{height:100svh;min-height:720px}.dropping header{padding-top:12px;padding-bottom:12px}.dropping h1{font-size:clamp(25px,2.3vw,34px)}.dropping .drop-lab{flex:1;min-height:0;gap:8px}.dropping .drop-stage{flex:1;min-height:220px;height:auto}.drop-controls,.drop-heading,.trace-history,.drop-note{flex-shrink:0}.dropping .caption{flex-shrink:0}}
+@media(min-width:1200px){.steps button{padding-left:12px;padding-right:12px}.steps #step-4{min-width:126px}}
+@media(max-width:800px){.drop-controls{gap:9px}.spin-rate-control{max-width:none}.drop-actions{width:100%}.drop-actions .control{flex:1;min-width:95px}.drop-stage{height:400px}.drop-heading{align-items:flex-start}.drop-legend{gap:6px 12px}.dropping .caption strong{font-size:18px}}
+@media(max-width:540px){.steps{display:grid;grid-template-columns:1fr 1.15fr 1.15fr 1.45fr}.steps button{font-size:13px;padding:8px 3px}.steps button small{font-size:11px}.step-num{margin-right:3px}.spin-rate-control label{font-size:14px}.drop-stage{height:380px;min-height:300px}.drop-actions .control{font-size:12px;padding:8px 5px}.drop-actions .control small{font-size:11px}.keep-trails{font-size:12px}.drop-heading{font-size:11px}.drop-heading strong{font-size:13px}.drop-legend{font-size:11px;gap:5px 10px}.trace-history{font-size:11px}.drop-note{font-size:11px}.dropping .caption span{font-size:14px}}
+
 </style>
 </head>
 <body>
 <div class="app" id="app">
-<header><h1>Air around a spinning basketball<span>观察旋转篮球周围的空气</span></h1><div class="lesson-tag"><strong>Observe · Compare · Explain</strong>观察 · 比较 · 解释</div></header>
+<header><h1>Air around a spinning basketball<span>观察旋转篮球周围的空气</span></h1><div class="lesson-tag"><strong>Observe · Compare · Explain · Release</strong>观察 · 比较 · 解释 · 释放</div></header>
 <main>
   <div class="toolbar" aria-label="Classroom controls / 课堂控制">
     <div class="group steps" role="group" aria-label="Learning step / 学习步骤">
       <button id="step-1" type="button" aria-pressed="true"><b class="step-num">1</b>Observe<small>观察</small></button>
       <button id="step-2" type="button" aria-pressed="false"><b class="step-num">2</b>Compare<small>同时追踪两点</small></button>
       <button id="step-3" type="button" aria-pressed="false"><b class="step-num">3</b>Explain<small>气压与侧向力</small></button>
+      <button id="step-4" type="button" aria-pressed="false"><b class="step-num">4</b>Release<small>释放并观察轨迹</small></button>
     </div>
     <div class="group modes" role="group" aria-label="Spin mode / 旋转方式">
       <button id="no-spin" type="button" aria-pressed="false">No spin<small>不旋转</small></button>
@@ -41,7 +50,7 @@
       <button class="control fullscreen" id="fullscreen" type="button">Full screen<small>全屏</small></button>
     </div>
   </div>
-  <div class="reference"><span><strong>Following the falling ball</strong> / 跟着下落的篮球看 · 正面视角</span><span class="directions">Ball ↓ 篮球下落　·　Relative air ↑ 相对气流向上</span></div>
+  <div class="reference"><span id="reference-view"><strong>Following the falling ball</strong> / 跟着下落的篮球看 · 正面视角</span><span class="directions" id="reference-directions">Ball ↓ 篮球下落　·　Relative air ↑ 相对气流向上</span></div>
   <div id="scene" class="scene" role="img" aria-label="A counterclockwise spinning basketball, with moving airflow tracers on both sides. / 逆时针旋转的篮球，两侧显示移动的气流标记。">
     <canvas id="flow" aria-hidden="true"></canvas>
     <div class="side left" aria-hidden="true"><div class="side-id">Left side / 左侧</div><h2 id="left-en">Watch the air</h2><div id="left-cn" class="translation">观察空气流动</div><div class="swatch"></div><div class="surface" id="left-surface" hidden>Surface moves ↓<span>左侧表面向下</span></div><div class="pressure" id="left-pressure" hidden>Higher pressure<span>气压较高</span></div></div>
@@ -51,15 +60,44 @@
     <div class="force-label" id="force-label" aria-hidden="true" hidden>Force from the air →<span>空气的侧向力</span></div>
     
   </div>
+
+  <section id="drop-lab" class="drop-lab" aria-label="Release and observe falling paths / 释放并观察下落轨迹" hidden>
+    <div class="drop-controls">
+      <div class="spin-rate-control">
+        <label for="spin-rate">Spin rate / 相对转速 <output id="spin-rate-value" for="spin-rate">1.00×</output></label>
+        <input id="spin-rate" type="range" min="0" max="3" step="0.25" value="1" aria-describedby="rate-description">
+        <div class="rate-scale"><span>0 · No spin / 无旋转</span><span>3× · Faster / 更快</span></div>
+      </div>
+      <div class="drop-actions">
+        <button id="release-ball" class="control primary" type="button">Release<small>释放篮球</small></button>
+        <button id="compare-drops" class="control" type="button">Compare all 3<small>同时释放三种</small></button>
+        <button id="clear-trails" class="control" type="button">Clear trails<small>清除轨迹</small></button>
+        <label class="keep-trails"><input id="keep-trails" type="checkbox" checked>Keep trails / 保留轨迹</label>
+      </div>
+    </div>
+    <div class="drop-heading">
+      <strong id="drop-status" class="drop-status" role="status" aria-live="polite">Ready to release / 等待释放</strong>
+      <div class="drop-legend" aria-label="Trajectory legend / 轨迹图例">
+        <span><i class="line-key none" style="--series:#738594"></i>No spin / 不旋转</span>
+        <span><i class="line-key" style="--series:#0089b3"></i>Counterclockwise / 逆时针</span>
+        <span><i class="line-key cw" style="--series:#c84c48"></i>Clockwise / 顺时针</span>
+      </div>
+    </div>
+    <div id="drop-stage" class="drop-stage" role="img" aria-label="A basketball ready to fall from a fixed height, seen from a stationary front view. / 从固定正面视角观察，篮球准备从相同高度释放。"><canvas id="drop-canvas" aria-hidden="true"></canvas></div>
+    <div id="trace-history" class="trace-history" aria-live="polite" hidden></div>
+    <div class="drop-note" id="rate-description">Same height · Released from rest · Same scale / 相同高度、静止释放、相同比例。转速与“慢放”分别控制；轨迹是简化模型示意。</div>
+  </section>
   <div class="caption"><div class="caption-copy" role="status" aria-live="polite"><strong id="caption-en">Which side has faster airflow?</strong><span id="caption-cn">先观察：靠近篮球的哪一侧，空气流得更快？</span></div><button class="control replay" id="replay" type="button" hidden>Track again<small>再次同时追踪</small></button></div>
 </main>
 <footer><details id="teacher-notes"><summary>Teaching notes / 教师提示 · 简化模型</summary><div class="notes">
-  <p><strong>三个步骤：</strong>“观察”先隐藏快慢结论；“比较”让 A、B 两个标记从球两侧同一高度同时出发，并在相同的模型时间后自动暂停；“解释”显示两侧气压比较和空气对球的侧向力。可随时切换不旋转、逆时针旋转与顺时针旋转。保持同一正面视角时，顺时针模式会把左右流速、压力与侧向力方向相应反转。“再次同时追踪”会重新开始这次比较。</p>
+  <p><strong>四个步骤：</strong>“观察”先隐藏快慢结论；“比较”让 A、B 两个标记从球两侧同一高度同时出发，并在相同的模型时间后自动暂停；“解释”显示两侧气压比较和空气对球的侧向力。可随时切换不旋转、逆时针旋转与顺时针旋转。保持同一正面视角时，顺时针模式会把左右流速、压力与侧向力方向相应反转。“再次同时追踪”会重新开始这次比较。第 4 步“释放”改用固定的地面视角，比较篮球下落轨迹。</p>
   <p><strong>怎样读图：</strong>红、蓝分别用于辨认左、右侧。淡色小标记表示背景气流；大标记 A、B 及其轨迹用于跟踪同一段时间内的移动。空心圆是起点。速度差主要观察球两侧近旁，不能把颜色当成整个半边空气都以同一速度流动。两个标记的试验时间相同，不要求它们同时绕过篮球或在球后方会合。</p>
   <p><strong>观察视角：</strong>镜头跟着下落的篮球，球在画面中居中；向下箭头表示篮球相对教室的运动，向上的气流表示空气相对篮球的运动。它不表示教室里的空气整体向上吹。“慢放”改变所有动画的播放速度，不改变两侧速度关系。</p>
-  <p><strong>模型范围：</strong>使用二维理想绕流与环流模型，定性呈现旋转球侧近旁的速度差。标记、时间与距离均为教学示意，不是篮球实验测量值。真实球的三维流动、边界层与尾流更复杂；压力标签只比较两侧相应区域。动画不计算实际下落轨迹，也不表示任意流动中都能简单用流速判断气压。</p>
+  <p><strong>模型范围：</strong>使用二维理想绕流与环流模型，定性呈现旋转球侧近旁的速度差。标记、时间与距离均为教学示意，不是篮球实验测量值。真实球的三维流动、边界层与尾流更复杂；压力标签只比较两侧相应区域。前三步用于观察局部气流，不计算真实篮球的下落轨迹；也不表示任意流动中都能简单用流速判断气压。</p>
+  <p><strong>第 4 步怎样比较：</strong>每次都从相同位置、相同高度静止释放。“相对转速”是本动画的可比较档位，不是实际每秒转数；不旋转模式固定为 0。改变旋转方向或转速后，点击“释放篮球”；也可以“同时释放三种”。运动过程中先用“返回起点”结束这一轮，再改变设置。“慢放”只改变播放速度，不改变计算轨迹。勾选“保留轨迹”可比较不同转速，最多保留最近 6 条已完成且不重复的轨迹；淡线是先前结果，深线是本次结果。点击“清除轨迹”开始新一组比较。</p>
+  <p><strong>下落模型：</strong>在静止空气中，以重力、与速度平方相关的阻力，以及与相对转速和球速相关、垂直于球速的马格努斯力，数值积分下落运动。球、空气和释放条件保持一致，只改变旋转方向与转速；旋转率在一次下落中保持不变。系数经教学可视化缩放，在本页有限转速范围内呈现“转得更快，水平偏离更大”的趋势。图中距离、时间与转速均为模型量，不用于预测真实篮球的落点，也不意味着实际运动在任意条件下都严格遵循该趋势。前三步保持原来的示例转速；第 4 步的滑块只控制下落实验。</p>
   <p>科学参考：<a href="https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/ideal-lift-of-a-spinning-ball/" target="_blank" rel="noopener noreferrer">NASA · Ideal Lift of a Spinning Ball</a>。动画可完全离线运行。</p>
-</div></details><span class="shortcuts">1 / 2 / 3：步骤　·　空格：暂停　·　R：再次追踪　·　F：全屏</span></footer>
+</div></details><span class="shortcuts">1 / 2 / 3 / 4：步骤　·　空格：暂停　·　R：重放　·　F：全屏</span></footer>
 </div>
 <script>
 (() => {
@@ -68,6 +106,7 @@
   const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // spin: +1 = counterclockwise, 0 = none, -1 = clockwise, viewed from the front.
   const state={spin:1,step:1,paused:prefersReduced,slow:false,time:0,angle:0,trial:null};
+  const drop={rate:1,viewAll:false,active:false,finished:false,elapsed:0,run:null,history:[],keep:true,nextId:0};
   const STARTS=[{x:-1.38,y:.48},{x:1.38,y:.48}],TRIAL_DURATION=1.12;
   let geometry={w:0,h:0,cx:0,cy:0,r:1,compact:false},paths=[],frameId=0,lastTime=0;
   let guides=document.createElement('canvas'),guideCtx=guides.getContext('2d');
@@ -101,6 +140,7 @@
   }
   function xy(p){return {x:geometry.cx+p.x*geometry.r,y:geometry.cy+p.y*geometry.r};}
   function resize(){
+    if(state.step===4){resizeDrop();return;}
     const box=scene.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),compact=box.width<=800;
     geometry={w:box.width,h:box.height,cx:box.width/2,cy:box.height*(compact?.565:.5),r:Math.min(box.height*(compact?.215:.255),box.width*(compact?.235:.15)),compact};
     canvas.width=Math.round(box.width*dpr);canvas.height=Math.round(box.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -136,6 +176,7 @@
     });
   }
   function draw(){
+    if(state.step===4){drawDrop();return;}
     const {w,h,cx,cy,r,compact}=geometry;if(!w||!h)return;ctx.clearRect(0,0,w,h);ctx.drawImage(guides,0,0,w,h);
     const k=state.spin*1.05,focus=state.step===2;
     ctx.save();
@@ -153,10 +194,108 @@
     if(!(compact&&state.step===3&&state.spin)){const start=cy+r+17,end=h-45;if(end>start+8)arrow(cx,start,cx,end,'#36596d',3,10);}
     if(state.step===3&&state.spin){arrow(cx,cy,cx+r*1.88*state.spin,cy,'#c79000',Math.max(6,r*.065),19);}
   }
+  // Drop model coordinates: x right, y down. All values are pedagogical model units.
+  // Magnus acceleration is perpendicular to velocity: (k*vy, -k*vx).
+  // This avoids adding energy with the lateral force. Spin sign is +1 for CCW.
+  const DROP_HEIGHT=8,DROP_RATE=.4,DROP_GRAVITY=9.81,DROP_DRAG=.012,DROP_LIFT=.4;
+  const dropCanvas=$('drop-canvas'),dropCtx=dropCanvas.getContext('2d');
+  let dropGeometry={w:0,h:0,cx:0,top:0,scale:1,r:22};
+  const modeInfo=spin=>spin===1?{en:'Counterclockwise',cn:'逆时针',short:'CCW',color:'#0089b3',dash:[],key:'ccw'}:spin===-1?{en:'Clockwise',cn:'顺时针',short:'CW',color:'#c84c48',dash:[9,5],key:'cw'}:{en:'No spin',cn:'不旋转',short:'No spin',color:'#738594',dash:[3,5],key:'none'};
+  function dropDerivative(p,spin,rate){
+    const speed=Math.hypot(p.vx,p.vy),k=DROP_LIFT*spin*rate;
+    return {x:p.vx,y:p.vy,vx:k*p.vy-DROP_DRAG*speed*p.vx,vy:DROP_GRAVITY-k*p.vx-DROP_DRAG*speed*p.vy};
+  }
+  function dropIntegrate(p,dt,spin,rate){
+    const keys=['x','y','vx','vy'],shift=(a,b,d)=>Object.fromEntries(keys.map(k=>[k,a[k]+b[k]*d]));
+    const a=dropDerivative(p,spin,rate),b=dropDerivative(shift(p,a,dt/2),spin,rate),c=dropDerivative(shift(p,b,dt/2),spin,rate),d=dropDerivative(shift(p,c,dt),spin,rate);
+    return Object.fromEntries(keys.map(k=>[k,p[k]+dt*(a[k]+2*b[k]+2*c[k]+d[k])/6]));
+  }
+  function makeDropPath(spin,rate){
+    rate=spin?rate:0;let p={x:0,y:0,vx:0,vy:0,t:0};const points=[p],dt=.004;
+    for(let i=0;i<2500;i++){
+      const next={...dropIntegrate(p,dt,spin,rate),t:p.t+dt};
+      if(next.y>=DROP_HEIGHT){const f=(DROP_HEIGHT-p.y)/(next.y-p.y),end={};for(const k of ['x','y','vx','vy','t'])end[k]=p[k]+(next[k]-p[k])*f;end.y=DROP_HEIGHT;points.push(end);return {spin,rate,points,duration:end.t,end};}
+      points.push(next);p=next;
+    }
+    throw new Error('The selected drop did not reach the ground.');
+  }
+  function pointAtDrop(entry,t){
+    if(t>=entry.duration)return entry.end;
+    const p=entry.points;let lo=0,hi=p.length-1;while(hi-lo>1){const mid=(lo+hi)>>1;if(p[mid].t<=t)lo=mid;else hi=mid;}
+    const a=p[lo],b=p[hi],f=Math.max(0,Math.min(1,(t-a.t)/(b.t-a.t)));
+    return {x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f,t};
+  }
+  function resizeDrop(){
+    if(state.step!==4)return;
+    const box=$('drop-stage').getBoundingClientRect();if(!box.width||!box.height)return;
+    const dpr=Math.min(window.devicePixelRatio||1,2),scale=Math.min((box.height-115)/DROP_HEIGHT,(box.width-90)/12.4),r=Math.min(23,Math.max(16,box.width*.045));
+    dropGeometry={w:box.width,h:box.height,cx:box.width/2,top:Math.max(43,(box.height-DROP_HEIGHT*scale)/2-6),scale,r};
+    dropCanvas.width=Math.round(box.width*dpr);dropCanvas.height=Math.round(box.height*dpr);dropCtx.setTransform(dpr,0,0,dpr,0,0);drawDrop();
+  }
+  function dropXY(p){return {x:dropGeometry.cx+p.x*dropGeometry.scale,y:dropGeometry.top+p.y*dropGeometry.scale};}
+  function drawDropBall(x,y,r,angle,spin){
+    const c=dropCtx;c.save();const g=c.createRadialGradient(x-r*.35,y-r*.4,r*.1,x,y,r*1.15);g.addColorStop(0,'#ffbd4f');g.addColorStop(.6,'#f98a20');g.addColorStop(1,'#da5c14');
+    c.fillStyle=g;c.strokeStyle='#ac4a13';c.lineWidth=1.5;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.stroke();c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.clip();c.translate(x,y);c.rotate(-angle);c.scale(r,r);c.strokeStyle='#493322';c.lineWidth=.06;c.beginPath();c.moveTo(-1,0);c.lineTo(1,0);c.moveTo(0,-1);c.lineTo(0,1);c.moveTo(-.64,-.8);c.bezierCurveTo(.55,-.55,.55,.55,-.64,.8);c.moveTo(.64,-.8);c.bezierCurveTo(-.55,-.55,-.55,.55,.64,.8);c.stroke();
+    c.fillStyle='#fff9e8';c.beginPath();c.arc(.43,-.47,.11,0,Math.PI*2);c.fill();c.restore();
+    // An outer color ring ties each ball to its trajectory label in compare mode.
+    c.strokeStyle=modeInfo(spin).color;c.lineWidth=2.5;c.beginPath();c.arc(x,y,r+3,0,Math.PI*2);c.stroke();
+  }
+  function strokeDropPath(entry,time,alpha,width){
+    const c=dropCtx,info=modeInfo(entry.spin);c.save();c.strokeStyle=info.color;c.globalAlpha=alpha;c.lineWidth=width;c.lineCap='round';c.lineJoin='round';c.setLineDash(info.dash);c.beginPath();
+    for(let i=0;i<entry.points.length;i++){const p=entry.points[i];if(p.t>time)break;const q=dropXY(p);if(i)c.lineTo(q.x,q.y);else c.moveTo(q.x,q.y);}
+    const end=dropXY(pointAtDrop(entry,time));c.lineTo(end.x,end.y);c.stroke();c.setLineDash([]);
+    if(time>=entry.duration){c.fillStyle=info.color;c.beginPath();c.arc(end.x,end.y,4,0,Math.PI*2);c.fill();}
+    c.restore();
+  }
+  function drawDrop(){
+    if(state.step!==4)return;const {w,h,cx,top,scale,r}=dropGeometry;if(!w||!h)return;
+    const c=dropCtx,ground=top+DROP_HEIGHT*scale+r+4,compact=w<640;c.clearRect(0,0,w,h);
+    c.save();c.lineWidth=1;c.strokeStyle='#dbe9ef';
+    for(let i=1;i<4;i++){const y=top+DROP_HEIGHT*scale*i/4;c.beginPath();c.moveTo(20,y);c.lineTo(w-20,y);c.stroke();}
+    c.strokeStyle='#9fb4c2';c.setLineDash([4,6]);c.beginPath();c.moveTo(cx,top+r+8);c.lineTo(cx,ground-3);c.stroke();c.setLineDash([]);
+    c.fillStyle='#e4efdf';c.fillRect(0,ground,w,h-ground);c.strokeStyle='#94b499';c.lineWidth=2;c.beginPath();c.moveTo(0,ground);c.lineTo(w,ground);c.stroke();
+    c.textBaseline='middle';c.textAlign='left';c.font=`${compact?12:14}px Arial, PingFang SC, sans-serif`;c.fillStyle='#526c7b';c.fillText(compact?'Same start / 相同起点':'Same release point / 相同释放位置',16,23);
+    c.textAlign='center';c.font=`${compact?11:13}px Arial, PingFang SC, sans-serif`;c.fillText(compact?'Reference line / 竖直参考线':'Vertical reference / 无水平偏离的参考线',cx,Math.min(h-13,ground+23));
+    c.strokeStyle='#b6cbd6';c.lineWidth=1;c.beginPath();c.arc(cx,top,r+7,0,Math.PI*2);c.stroke();
+    const runIds=new Set(drop.run?.entries.map(e=>e.id)||[]);
+    if(drop.keep)for(const entry of drop.history)if(!runIds.has(entry.id))strokeDropPath(entry,entry.duration,.38,2.2);
+    if(drop.run){
+      for(const entry of drop.run.entries)strokeDropPath(entry,drop.elapsed,.95,3.5);
+      for(const entry of drop.run.entries){const p=pointAtDrop(entry,drop.elapsed),q=dropXY(p),angle=Math.min(drop.elapsed,entry.duration)*entry.spin*entry.rate*4.6;drawDropBall(q.x,q.y,r,angle,entry.spin);}
+    }else drawDropBall(cx,top,r,0,state.spin);
+    c.restore();
+  }
+  function resetDrop(){drop.active=false;drop.finished=false;drop.elapsed=0;drop.run=null;state.paused=true;render();wake();}
+  function releaseDrop(all){
+    if(state.step!==4)return;drop.viewAll=all;
+    const spins=all?[0,-1,1]:[state.spin],entries=spins.map(spin=>({...makeDropPath(spin,drop.rate),id:++drop.nextId}));
+    drop.run={entries,all,duration:Math.max(...entries.map(e=>e.duration))};drop.elapsed=0;drop.active=true;drop.finished=false;state.paused=false;render();wake();
+  }
+  function tickDrop(dt){
+    if(!drop.active||!drop.run)return;drop.elapsed=Math.min(drop.run.duration,drop.elapsed+dt*(state.slow?.35:1)*DROP_RATE);
+    if(drop.elapsed>=drop.run.duration){
+      drop.active=false;drop.finished=true;state.paused=true;
+      if(drop.keep){for(const entry of drop.run.entries){drop.history=drop.history.filter(e=>!(e.spin===entry.spin&&e.rate===entry.rate));drop.history.push(entry);}drop.history=drop.history.slice(-6);}
+      render();
+    }
+  }
+  function renderDrop(){
+    const rate=(drop.viewAll||state.spin)?drop.rate:0,slider=$('spin-rate');slider.disabled=drop.active||(!state.spin&&!drop.viewAll);slider.value=String(rate);slider.setAttribute('aria-valuetext',`${rate.toFixed(2)} times reference spin rate / ${rate.toFixed(2)} 倍相对转速`);$('spin-rate-value').textContent=`${rate.toFixed(2)}×`;
+    $('release-ball').innerHTML=drop.active?'Reset<small>返回起点</small>':drop.finished?'Release again<small>再次释放</small>':drop.viewAll?'Release all 3<small>释放三种模式</small>':'Release<small>释放篮球</small>';
+    $('compare-drops').setAttribute('aria-pressed',String(drop.viewAll));$('compare-drops').disabled=drop.active;$('clear-trails').disabled=drop.active||(!drop.history.length&&!drop.run);$('keep-trails').disabled=drop.active;
+    const mode=modeInfo(state.spin),isAll=drop.run?.all;
+    $('drop-status').textContent=drop.active?(state.paused?'Paused / 已暂停':isAll?`Comparing all 3 · Spin ${rate.toFixed(2)}× / 三种模式同时下落`:`${mode.en} / ${mode.cn} · ${rate.toFixed(2)}×`):drop.finished?'Landed · Compare the paths / 已落地 · 比较轨迹':(drop.viewAll?'Ready · All three / 准备同时释放三种':'Ready to release / 等待释放');
+    const hist=$('trace-history');hist.replaceChildren();hist.hidden=!drop.keep||!drop.history.length;
+    if(!hist.hidden){const label=document.createElement('span');label.textContent='Saved paths / 已保留：';hist.append(label);for(const e of drop.history){const info=modeInfo(e.spin),span=document.createElement('span');span.className='record'+(drop.run?.entries.some(x=>x.id===e.id)?' record-current':'');const key=document.createElement('i');key.className='line-key '+info.key;key.style.setProperty('--series',info.color);span.append(key,document.createTextNode(`${info.short} ${info.cn} · ${e.rate.toFixed(2)}×`));hist.append(span);}}
+    const states=drop.run?.entries.map(e=>`${modeInfo(e.spin).en} ${e.rate.toFixed(2)}×`).join(', ')||`${mode.en} ${rate.toFixed(2)}×`;
+    $('drop-stage').setAttribute('aria-label',`Stationary front view. Same starting height and zero initial velocity. ${states}. ${drop.finished?'The balls have landed.':''} 固定正面视角；同一高度静止释放。${drop.finished?'篮球已落地，可比较轨迹。':'先预测，再观察下落轨迹。'}`);
+  }
+
   function startTrial(){
     state.trial={elapsed:0,done:false,dots:STARTS.map(p=>({...p})),trails:STARTS.map(p=>[{...p}])};state.paused=false;render();wake();
   }
   function tick(dt){
+    if(state.step===4){tickDrop(dt);return;}
     const step=dt*(state.slow?.35:1),modelStep=step*.70;
     state.time+=modelStep;if(state.spin)state.angle=(state.angle+step*.97*state.spin)%(Math.PI*2);
     const trial=state.trial;if(!trial||trial.done||state.step!==2)return;
@@ -165,9 +304,14 @@
     if(trial.elapsed>=TRIAL_DURATION-1e-8){trial.done=true;state.paused=true;render();}
   }
   function render(){
-    const comparing=state.step>=2,explaining=state.step===3;
-    for(let i=1;i<=3;i++)$('step-'+i).setAttribute('aria-pressed',String(state.step===i));
-    $('no-spin').setAttribute('aria-pressed',String(!state.spin));$('ccw').setAttribute('aria-pressed',String(state.spin===1));$('cw').setAttribute('aria-pressed',String(state.spin===-1));
+    const dropping=state.step===4,comparing=state.step>=2,explaining=state.step===3;
+    app.classList.toggle('dropping',dropping);scene.hidden=dropping;$('drop-lab').hidden=!dropping;
+    $('reference-view').innerHTML=dropping?'<strong>Watching from the ground</strong> / 从地面观察 · 固定正面视角':'<strong>Following the falling ball</strong> / 跟着下落的篮球看 · 正面视角';
+    $('reference-directions').textContent=dropping?'Same height · Same release / 相同高度 · 静止释放':'Ball ↓ 篮球下落　·　Relative air ↑ 相对气流向上';
+    for(const id of ['no-spin','ccw','cw'])$(id).disabled=dropping&&drop.active;
+    $('pause').disabled=dropping&&!drop.active;
+    for(let i=1;i<=4;i++)$('step-'+i).setAttribute('aria-pressed',String(state.step===i));
+    $('no-spin').setAttribute('aria-pressed',String(!state.spin&&!(dropping&&drop.viewAll)));$('ccw').setAttribute('aria-pressed',String(state.spin===1&&!(dropping&&drop.viewAll)));$('cw').setAttribute('aria-pressed',String(state.spin===-1&&!(dropping&&drop.viewAll)));
     $('pause').setAttribute('aria-pressed',String(state.paused));$('pause').innerHTML=state.paused?'Play<small>继续</small>':'Pause<small>暂停</small>';
     $('slow').setAttribute('aria-pressed',String(state.slow));$('slow').innerHTML=state.slow?'0.35×<small>慢放中</small>':'Slow<small>慢放</small>';
     $('spin-label').innerHTML=state.spin===1?'Counterclockwise<span>逆时针旋转</span>':state.spin===-1?'Clockwise<span>顺时针旋转</span>':'No spin<span>不旋转</span>';$('spin-label').hidden=state.step===2;
@@ -183,7 +327,12 @@
     $('replay').hidden=state.step!==2;
     const done=state.trial&&state.trial.done;
     let en,cn;
-    if(state.step===1){en='Which side has faster airflow?';cn='先观察：靠近篮球的哪一侧，空气流得更快？';}
+    if(dropping){
+      if(drop.active){en='Watch the path as the ball falls.';cn='观察篮球下落时的轨迹。灰色虚线表示没有水平偏离的参考方向。';}
+      else if(drop.finished){en='What changes when the spin rate increases?';cn='保留这次轨迹，调高转速后再次释放，比较球偏离参考线的程度。';}
+      else{en='Predict the path, then release the ball.';cn='先预测轨迹，再点击“释放篮球”；也可以同时释放三种模式进行比较。';}
+    }
+    else if(state.step===1){en='Which side has faster airflow?';cn='先观察：靠近篮球的哪一侧，空气流得更快？';}
     else if(state.step===2&&!done){en='Follow A and B for the same amount of time.';cn='两个标记从同一高度同时出发；观察它们在相同时间内的移动。';}
     else if(state.step===2){en=state.spin===1?'In the same time, B has travelled farther.':state.spin===-1?'In the same time, A has travelled farther.':'Without spin, A and B move symmetrically.';cn=state.spin===1?'动画已暂停：相同时间内，右侧 B 移动得更远。空心圆是起点。':state.spin===-1?'动画已暂停：相同时间内，左侧 A 移动得更远。空心圆是起点。':'动画已暂停：不旋转时，两点对称移动。空心圆是起点。';}
     else{en=state.spin?'The air exerts a sideways force on the ball.':'Without spin, there is no spin-induced sideways force.';cn=state.spin===1?'这个模型中：左侧气压较高、右侧较低，空气对球产生向右的侧向力。':state.spin===-1?'这个模型中：左侧气压较低、右侧较高，空气对球产生向左的侧向力。':'这个模型中，两侧气压相近，没有由旋转产生的侧向力。';}
@@ -193,27 +342,37 @@
     const airflow=comparing?(state.spin===1?'Air near the left is slower; near the right is faster. 左侧气流较慢，右侧较快。':state.spin===-1?'Air near the left is faster; near the right is slower. 左侧气流较快，右侧较慢。':'Similar airflow on both sides. 两侧流速相近。'):'Observe the moving air on both sides. 先观察两侧气流。';
     const force=explaining&&state.spin?(state.spin===1?'The air exerts a force to the right. 空气的侧向力向右。':'The air exerts a force to the left. 空气的侧向力向左。'):'';
     scene.setAttribute('aria-label',`Following the falling ball. 跟着下落的篮球看。 ${spinName} ${airflow} ${force}`);
+    if(dropping)renderDrop();
     draw();
   }
   function setStep(step){
+    if(state.step===4&&step!==4){drop.active=false;drop.run=null;drop.elapsed=0;drop.finished=false;}
     state.step=step;state.trial=null;
+    if(step===4){state.paused=!drop.active;render();resizeDrop();wake();return;}
     if(step===2){startTrial();return;}
-    if(step===1)state.paused=prefersReduced;
+    if(step===1||step===3)state.paused=prefersReduced;
     render();wake();
   }
   function setSpin(spin){
-    if(![-1,0,1].includes(spin))return;
-    if(state.spin===spin)return;state.spin=spin;state.time=0;state.angle=0;state.trial=null;buildPaths();
+    if(![-1,0,1].includes(spin)||(state.step===4&&drop.active))return;
+    if(state.spin===spin&&!(state.step===4&&drop.viewAll))return;drop.viewAll=false;state.spin=spin;state.time=0;state.angle=0;state.trial=null;buildPaths();
+    if(state.step===4){resetDrop();return;}
     if(state.step===2){startTrial();return;}render();wake();
   }
-  function pause(){state.paused=!state.paused;render();wake();}
+  function pause(){if(state.step===4&&!drop.active)return;state.paused=!state.paused;render();wake();}
   function frame(now){frameId=0;if(state.paused||document.hidden){lastTime=0;return;}const dt=lastTime?Math.min((now-lastTime)/1000,.05):0;lastTime=now;tick(dt);draw();if(!state.paused)frameId=requestAnimationFrame(frame);else lastTime=0;}
   function wake(){if(state.paused||document.hidden){if(frameId)cancelAnimationFrame(frameId);frameId=0;lastTime=0;}else if(!frameId){lastTime=0;frameId=requestAnimationFrame(frame);}}
   async function fullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else if(app.requestFullscreen)await app.requestFullscreen();else $('fullscreen').innerHTML='Browser menu<small>请用浏览器全屏</small>';}catch(_){$('fullscreen').innerHTML='Browser menu<small>请用浏览器全屏</small>';}}
-  for(let i=1;i<=3;i++)$('step-'+i).addEventListener('click',()=>setStep(i));
+  for(let i=1;i<=4;i++)$('step-'+i).addEventListener('click',()=>setStep(i));
   $('no-spin').addEventListener('click',()=>setSpin(0));$('ccw').addEventListener('click',()=>setSpin(1));$('cw').addEventListener('click',()=>setSpin(-1));$('pause').addEventListener('click',pause);$('slow').addEventListener('click',()=>{state.slow=!state.slow;render();});$('replay').addEventListener('click',startTrial);$('fullscreen').addEventListener('click',fullscreen);
   document.addEventListener('fullscreenchange',()=>{$('fullscreen').innerHTML=document.fullscreenElement?'Exit full screen<small>退出全屏</small>':'Full screen<small>全屏</small>';resize();});document.addEventListener('visibilitychange',wake);
-  document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target.closest('button,input,summary,a,textarea,select'))return;if(e.code==='Space'){e.preventDefault();pause();}else if(['1','2','3'].includes(e.key))setStep(Number(e.key));else if(e.key.toLowerCase()==='r'&&state.step===2)startTrial();else if(e.key.toLowerCase()==='f')fullscreen();});
+  document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target.closest('button,input,summary,a,textarea,select'))return;if(e.code==='Space'){e.preventDefault();pause();}else if(['1','2','3','4'].includes(e.key))setStep(Number(e.key));else if(e.key.toLowerCase()==='r'&&state.step===2)startTrial();else if(e.key.toLowerCase()==='r'&&state.step===4)releaseDrop(drop.viewAll);else if(e.key.toLowerCase()==='f')fullscreen();});
+  $('spin-rate').addEventListener('input',e=>{if(drop.active)return;drop.rate=Number(e.target.value);resetDrop();});
+  $('release-ball').addEventListener('click',()=>drop.active?resetDrop():releaseDrop(drop.viewAll));
+  $('compare-drops').addEventListener('click',()=>releaseDrop(true));
+  $('clear-trails').addEventListener('click',()=>{drop.history=[];resetDrop();});
+  $('keep-trails').addEventListener('change',e=>{drop.keep=e.target.checked;if(!drop.keep)drop.history=[];render();});
+  new ResizeObserver(resizeDrop).observe($('drop-stage'));
   new ResizeObserver(resize).observe(scene);buildPaths();resize();wake();
 })();
 </script>

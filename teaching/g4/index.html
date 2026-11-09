@@ -9,12 +9,35 @@
     .wrap { max-width:960px; margin:0 auto; padding:28px 20px 40px; }
     .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; margin-top:12px; }
     a { color:#2563eb; text-decoration:none; font-weight:600; }
+    .nature { margin: 0 0 26px; }
+    .nature h2 { margin-top: 0; }
+    .nature figure { margin: 0; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    .nature-image { display: block; color: inherit; }
+    .nature-image:focus-visible { outline: 3px solid #2563eb; outline-offset: 4px; }
+    .nature img { display: block; width: 100%; height: auto; }
+    .nature figcaption { padding: 12px 16px 14px; color: #4b5563; font-size: 14px; line-height: 1.7; }
+    .nature figcaption p { margin: 0 0 5px; }
+    .nature figcaption a { color: #2563eb; font-weight: 600; }
+    @media (max-width: 540px) { .wrap { padding: 22px 14px 32px; } h1 { font-size: 27px; } }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>G4 Teaching Portal</h1>
     <p><a href="../">← 返回 Teaching</a></p>
+
+    <section class="nature" aria-labelledby="nature-title">
+      <h2 id="nature-title">身边的自然 · Nature Around Us</h2>
+      <figure>
+        <a class="nature-image" href="../../assets/nature-around-us.webp" target="_blank" rel="noopener" aria-label="查看身边的自然高清大图（新窗口）">
+          <img src="../../assets/nature-around-us.webp" width="1834" height="1008" fetchpriority="high" alt="八种生物的摄影拼图：秋茄、弹涂鱼、招潮蟹、牡蛎、黑鸢、黑翅长脚鹬、蚯蚓和东方蜜蜂；每种生物配有中文名称。" />
+        </a>
+        <figcaption>
+          <p>从植物到鸟类，观察这些生物的外形与生活环境。你认识其中的几种？</p>
+          <a href="../../assets/nature-around-us.webp" target="_blank" rel="noopener">查看大图 · View full image ↗</a>
+        </figcaption>
+      </figure>
+    </section>
 
     <div class="card">
       <h3><a href="./curving-shot/">弧线射门互动 · Curving Shot Interactive</a></h3>

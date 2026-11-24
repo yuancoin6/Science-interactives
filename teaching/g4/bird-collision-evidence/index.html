@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bird Collision Investigation · Evidence Centre</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, "PingFang SC", BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #1f2937;
+      background: #f4f7fb;
+    }
+
+    body { margin: 0; }
+    main { width: min(60rem, calc(100% - 2rem)); margin: 0 auto; padding: 1.75rem 0 3rem; }
+    a { color: #1d4ed8; font-weight: 600; }
+    a:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 4px; }
+    h1 { margin: 1.25rem 0 .35rem; font-size: clamp(1.75rem, 4vw, 2.5rem); line-height: 1.15; }
+    h2 { margin: 2rem 0 .8rem; font-size: 1.3rem; }
+    h3 { margin: 0; font-size: 1.05rem; }
+    .subtitle { margin: 0; color: #475569; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: .9rem; }
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      padding: 1rem;
+      border: 1px solid #e0e5ed;
+      border-radius: .75rem;
+      background: #fff;
+    }
+
+    img, video { display: block; width: 100%; border-radius: .45rem; background: #edf2f8; }
+    img { height: auto; }
+    video { aspect-ratio: 16 / 9; background: #172033; }
+
+    .download {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 .85rem;
+      margin-top: auto;
+      border-radius: .45rem;
+      background: #eaf1ff;
+      text-decoration: none;
+    }
+
+    .download:hover { background: #dae7ff; }
+    .file-details { font-size: .875rem; color: #475569; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <a href="../">返回 G4 · <span lang="en">Back to G4</span></a>
+      <h1 lang="en">Bird Collision Investigation · Evidence Centre</h1>
+      <p class="subtitle">校园鸟类撞玻璃调查 · 证据中心</p>
+    </header>
+
+    <section aria-labelledby="photos">
+      <h2 id="photos">照片证据 · <span lang="en">Photo Evidence</span></h2>
+      <div class="cards">
+        <article class="card">
+          <h3>照片 1 · <span lang="en">Photo 1</span></h3>
+          <img src="media/photo-1.jpg" alt="校园调查证据照片 1" width="4096" height="3072" loading="lazy" decoding="async">
+          <a class="download" href="media/photo-1.jpg" download="1.jpg">下载照片 1 · <span lang="en">&nbsp;Download Photo 1</span></a>
+          <span class="file-details">JPG · 5.4 MB</span>
+        </article>
+        <article class="card">
+          <h3>照片 2 · <span lang="en">Photo 2</span></h3>
+          <img src="media/photo-2.jpg" alt="校园调查证据照片 2" width="4096" height="3072" loading="lazy" decoding="async">
+          <a class="download" href="media/photo-2.jpg" download="2.jpg">下载照片 2 · <span lang="en">&nbsp;Download Photo 2</span></a>
+          <span class="file-details">JPG · 4.0 MB</span>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="videos">
+      <h2 id="videos">视频证据 · <span lang="en">Video Evidence</span></h2>
+      <div class="cards">
+        <article class="card">
+          <h3>11/07 撞玻璃关键片段 · <span lang="en">Key Clip</span></h3>
+          <video controls playsinline preload="none" src="media/nov-07-key-clip.mov" aria-label="11 月 7 日撞玻璃关键片段"></video>
+          <a class="download" href="media/nov-07-key-clip.mov" download="11.07_撞玻璃关键片段_62-75秒.mov">下载视频 · <span lang="en">&nbsp;Download Video</span></a>
+          <span class="file-details">62–75 s · MOV · 4.4 MB</span>
+        </article>
+        <article class="card">
+          <h3>11/09 片段 A · <span lang="en">Clip A</span></h3>
+          <video controls playsinline preload="none" src="media/nov-09-clip-a.mov" aria-label="11 月 9 日片段 A"></video>
+          <a class="download" href="media/nov-09-clip-a.mov" download="11.09_片段A_28-46秒.mov">下载视频 A · <span lang="en">&nbsp;Download Video A</span></a>
+          <span class="file-details">28–46 s · MOV · 6.1 MB</span>
+        </article>
+        <article class="card">
+          <h3>11/09 片段 B · <span lang="en">Clip B</span></h3>
+          <video controls playsinline preload="none" src="media/nov-09-clip-b.mov" aria-label="11 月 9 日片段 B"></video>
+          <a class="download" href="media/nov-09-clip-b.mov" download="11.09_片段B_290-325秒.mov">下载视频 B · <span lang="en">&nbsp;Download Video B</span></a>
+          <span class="file-details">290–325 s · MOV · 11.5 MB</span>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
